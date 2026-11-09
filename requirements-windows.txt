@@ -1,0 +1,5 @@
+# Bare for å bygge Windows-programmet (LemusRemote.exe og installasjonsprogrammet).
+# Selve appen trenger ingen pakker: py -m lemus_remote virker uten disse.
+pyinstaller==6.16.0
+pystray==0.19.5
+pillow==11.3.0

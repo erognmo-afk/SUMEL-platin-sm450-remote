@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:qq="http://www.tencent.com">
+ <device>
+  <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
+  <friendlyName>Lemus Home 1500</friendlyName>
+  <manufacturer>LibreWireless</manufacturer>
+  <modelDescription>LibreSyncDMR</modelDescription>
+  <modelName>LibreWireless</modelName>
+  <serialNumber>1234567890</serialNumber>
+  <UDN>uuid:00000000-0000-0000-0000-000000001500</UDN>
+ </device>
+</root>

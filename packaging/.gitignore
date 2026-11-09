@@ -1,0 +1,4 @@
+# Byggeresultater (packaging/build.ps1)
+build/
+dist/
+Output/

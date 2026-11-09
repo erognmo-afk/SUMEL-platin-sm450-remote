@@ -1,0 +1,145 @@
+# Bygger Windows-programmet SUMEL – fjernkontroll for Platin SM450 (uoffisiell; het tidligere
+# Lemus Remote): SUMEL.exe (PyInstaller) og SUMEL-Setup-<versjon>.exe (Inno Setup).
+# Installasjonsprogrammet lastes opp som artifact «SUMEL-Setup»
+# (Actions → kjøringen → Artifacts). Trenger ingen hemmeligheter.
+#
+# Testene kjører i en egen jobb ved siden av bygget, så en test som henger på Windows
+# ikke stopper installasjonsprogrammet. Bygget sjekker selve exe-filen (røyktest og
+# stille installasjon/avinstallering).
+name: Windows-program
+
+# Windows-maskiner på GitHub koster penger for private repoer. Derfor bygges det bare når
+# noen trykker «Run workflow» (Actions → Windows-program) eller når en versjon tagges (v0.9.1 osv.),
+# ikke ved hver push.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: .
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      # Uten pystray/Pillow: programmet skal virke uten dem.
+      - name: Tester for Windows-programmet (tray.py)
+        timeout-minutes: 5
+        run: python -m unittest discover -s tests -t tests -p test_tray.py -v
+
+      # Henger en test, skrives alle trådenes stakk ut etter 8 minutter og steget feiler.
+      - name: Alle enhetstester
+        timeout-minutes: 12
+        run: >-
+          python -X faulthandler -c "import faulthandler, unittest;
+          faulthandler.dump_traceback_later(480, exit=True);
+          unittest.main(module=None, argv=['unittest', 'discover', '-s', 'tests', '-t', 'tests', '-v'])"
+
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Installer byggeverktøy
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-windows.txt
+
+      # windows-latest har vanligvis Inno Setup 6 fra før; choco brukes bare når den mangler.
+      - name: Inno Setup
+        run: |
+          $found = @("${env:ProgramFiles(x86)}\Inno Setup *\ISCC.exe", "$env:ProgramFiles\Inno Setup *\ISCC.exe") |
+                   ForEach-Object { Get-ChildItem -Path $_ -ErrorAction SilentlyContinue } | Select-Object -First 1
+          if ($found) { Write-Host "Inno Setup finnes: $($found.FullName) $($found.VersionInfo.FileVersion)" }
+          else { choco install innosetup -y --no-progress; if ($LASTEXITCODE -ne 0) { throw "choco feilet ($LASTEXITCODE)" } }
+
+      - name: Bygg SUMEL.exe og installasjonsprogrammet
+        env:
+          PYTHON: python
+        run: ./packaging/build.ps1
+
+      - name: Røyktest av SUMEL.exe (tray-modus, som når brukeren dobbeltklikker)
+        run: |
+          $cfg = Join-Path $env:RUNNER_TEMP 'sumel-test\config.json'
+          $p = Start-Process -FilePath 'packaging\dist\SUMEL\SUMEL.exe' `
+                -ArgumentList '--background', '--local-only', '--no-scan', '--port', '18765', '--config', $cfg `
+                -PassThru
+          try {
+            $ok = $false
+            for ($i = 0; $i -lt 30 -and -not $ok; $i++) {
+              Start-Sleep -Seconds 1
+              try {
+                $page = Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:18765/' -TimeoutSec 3
+                $state = Invoke-RestMethod -Uri 'http://127.0.0.1:18765/api/state' -TimeoutSec 3
+                $ok = ($page.StatusCode -eq 200) -and ($page.Content -match '<title>SUMEL') -and ($null -ne $state.PSObject.Properties['connected'])
+              } catch { }
+            }
+            if (-not $ok) { throw 'SUMEL.exe svarte ikke på http://127.0.0.1:18765/' }
+            Write-Host 'SUMEL.exe svarer med index.html og /api/state'
+          } finally {
+            Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+            $log = Join-Path (Split-Path $cfg) 'lemus.log'
+            if (Test-Path $log) { Get-Content $log }
+          }
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: SUMEL-Setup
+          path: packaging/Output/SUMEL-Setup-*.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      # Etter opplastingen, så en feil her ikke stopper artifacten. Runneren er administrator.
+      - name: Test installasjon, brannmurregel og avinstallering
+        run: |
+          $runKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
+          $setupLog = Join-Path $env:RUNNER_TEMP 'setup.log'
+          $setup = (Get-ChildItem packaging\Output\SUMEL-Setup-*.exe | Select-Object -First 1).FullName
+          $p = Start-Process -FilePath $setup -Wait -PassThru `
+                -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/TASKS=autostart', "/LOG=$setupLog"
+          if ($p.ExitCode -ne 0) { Get-Content $setupLog -ErrorAction SilentlyContinue; throw "installasjonen feilet ($($p.ExitCode))" }
+          $app = Join-Path $env:ProgramFiles 'SUMEL'
+          if (-not (Test-Path "$app\SUMEL.exe")) { throw "SUMEL.exe mangler i $app" }
+          netsh advfirewall firewall show rule name="SUMEL" verbose
+          if ($LASTEXITCODE -ne 0) { throw 'brannmurregelen «SUMEL» mangler' }
+          $run = Get-ItemProperty $runKey -Name SUMEL -ErrorAction SilentlyContinue
+          if (-not $run) { throw 'Start med Windows (HKCU Run SUMEL) mangler' }
+          Write-Host "Run: $($run.SUMEL)"
+          if (Get-ItemProperty $runKey -Name LemusRemote -ErrorAction SilentlyContinue) { throw 'den gamle Run-verdien LemusRemote ligger igjen' }
+          if (-not (Test-Path (Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\SUMEL.lnk'))) { throw 'snarveien SUMEL i Start-menyen mangler' }
+          Get-Process SUMEL -ErrorAction SilentlyContinue | Stop-Process -Force
+          $u = Start-Process -FilePath "$app\unins000.exe" -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART' -Wait -PassThru
+          if ($u.ExitCode -ne 0) { throw "avinstallering feilet ($($u.ExitCode))" }
+          # Avinstalleringen fortsetter fra en kopi i TEMP; vent til den har slettet seg selv.
+          for ($i = 0; $i -lt 60 -and ((Test-Path "$app\SUMEL.exe") -or (Test-Path "$app\unins000.exe")); $i++) { Start-Sleep -Seconds 1 }
+          Start-Sleep -Seconds 2
+          if (Test-Path "$app\SUMEL.exe") { throw 'SUMEL.exe ligger igjen etter avinstallering' }
+          netsh advfirewall firewall show rule name="SUMEL" | Out-Null
+          if ($LASTEXITCODE -eq 0) { throw 'brannmurregelen ligger igjen etter avinstallering' }
+          if (Get-ItemProperty $runKey -Name SUMEL -ErrorAction SilentlyContinue) { throw 'Run-verdien ligger igjen etter avinstallering' }
+          if (Test-Path (Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\SUMEL.lnk')) { throw 'snarveien ligger igjen etter avinstallering' }
+          Write-Host 'Installasjon, brannmurregel, Start med Windows og avinstallering virker'
+          exit 0

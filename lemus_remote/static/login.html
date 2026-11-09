@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<script>
+/* samme frontplate-valg som appen ('lemus_front'), satt før første tegning: «plain» (standard) eller «alu» */
+(function () { var f = "alu"; try { if (localStorage.getItem("lemus_front") === "plain") f = "plain"; } catch (e) { /* privat modus */ } document.documentElement.setAttribute("data-front", f); })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SUMEL – logg inn</title>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SUMEL">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#121110">
+<meta name="color-scheme" content="dark">
+<style>
+  :root { --bg:#121110; --fg:#ece7df; --muted:#a39d93; --faint:#8a847b; --amber:#f2a84e; --err:#e48a6e;
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='400'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.45 .006' numOctaves='3' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .12 0 0 0 0 .06 0 0 0 0 .02 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    --sans:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+    --brush:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='120'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0015 .9' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E"); }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; min-height:100%; color:var(--fg); font:15px/1.5 var(--sans);
+    background:radial-gradient(900px 480px at 50% -120px, rgba(255,214,160,.07), transparent 70%), var(--bg); }
+  main { min-height:100vh; display:grid; place-items:center; padding:calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)); }
+  /* samme kabinett som i appen: grafitt med valnøttsider og rette hjørner, ingen aluminiumsliste */
+  .plate { position:relative; width:100%; max-width:380px; border-radius:0; overflow:hidden; padding:0 10px;
+    background:radial-gradient(130% 70% at 50% 0%, #2a2825 0%, #1f1e1c 48%, #191816 100%);
+    box-shadow:0 0 0 1px rgba(0,0,0,.75), 0 30px 60px -20px rgba(0,0,0,.8); }
+  .plate::before, .plate::after { content:""; position:absolute; top:0; bottom:0; width:10px; border-radius:0;
+    background:var(--grain), linear-gradient(90deg, #3a2416, #5a3a23 35%, #4a2f1c 70%, #2e1c10);
+    box-shadow:inset -1px 0 0 rgba(255,255,255,.08), inset 1px 0 0 rgba(0,0,0,.5); }
+  .plate::before { left:0; } .plate::after { right:0; transform:scaleX(-1); }
+  .head { display:flex; align-items:flex-start; gap:12px; padding:18px 14px 0; }
+  .brand { min-width:0; }
+  .mark { display:block; font-weight:300; font-size:19px; line-height:1; letter-spacing:.42em; text-transform:uppercase; color:var(--fg); }
+  .mark::after { content:""; display:block; width:22px; height:2px; margin-top:7px; border-radius:1px; background:linear-gradient(90deg, #6b4529, #4b2f1d); }
+  .sub { display:block; margin-top:6px; font-size:12px; letter-spacing:.03em; color:var(--muted); }
+  .well { margin-left:auto; margin-top:-3px; flex:none; display:flex; align-items:center; padding:7px 9px; border-radius:8px;
+    background:linear-gradient(180deg, #0c0b0a, #131210); box-shadow:inset 0 1px 3px rgba(0,0,0,.85), inset 0 0 0 1px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.05); }
+  .lamp { width:6px; height:6px; border-radius:50%; background:#fffef9; box-shadow:0 0 5px 1px rgba(255,250,236,.75), 0 0 12px rgba(255,246,228,.25); }
+  .body { padding:22px 14px 22px; }
+  /* MED aluminiumslist (valgt under Mer → Utseende i appen): børstet lys list med SUMEL-gravering, som før; rette hjørner */
+  .strip { display:none; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid rgba(0,0,0,.65);
+    background:var(--brush), linear-gradient(180deg, #dddcd7 0%, #c4c3be 55%, #b0afaa 100%); box-shadow:inset 0 1px 0 rgba(255,255,255,.8); }
+  .strip .mark { font-size:13px; font-weight:500; letter-spacing:.46em; color:#34332f; text-shadow:0 1px 0 rgba(255,255,255,.65); }
+  .strip .mark::after { display:none; }
+  .lampl { margin-left:auto; display:flex; align-items:center; gap:7px; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#3f3e3a; font-weight:600; text-shadow:0 1px 0 rgba(255,255,255,.55); }
+  .lampl .lamp { box-shadow:0 0 0 1.5px rgba(40,38,34,.55), 0 0 6px 2px rgba(255,253,244,1); }
+  html[data-front="alu"] .plate { padding:0; }
+  html[data-front="alu"] .plate::before, html[data-front="alu"] .plate::after { display:none; }
+  html[data-front="alu"] .head { display:none; }
+  html[data-front="alu"] .strip { display:flex; }
+  html[data-front="alu"] .body { padding:26px 22px 24px; }
+  h1 { font-weight:300; font-size:24px; margin:0 0 8px; letter-spacing:.01em; }
+  p { color:var(--muted); font-size:14px; margin:0 0 20px; }
+  label { display:block; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--faint); font-weight:600; margin-bottom:8px; }
+  input { width:100%; font:inherit; font-size:28px; letter-spacing:.4em; text-align:center; padding:14px 10px 14px calc(10px + .4em); border-radius:14px;
+    border:1px solid rgba(255,236,210,.13); background:#0e0d0c; color:var(--fg); font-variant-numeric:tabular-nums; box-shadow:inset 0 1px 3px rgba(0,0,0,.6); }
+  input::placeholder { color:#5c5852; letter-spacing:.08em; font-size:20px; }
+  input:focus { outline:none; border-color:rgba(242,168,78,.6); box-shadow:inset 0 1px 3px rgba(0,0,0,.6), 0 0 0 3px rgba(242,168,78,.15); }
+  button { margin-top:16px; width:100%; min-height:50px; font:inherit; font-weight:600; border-radius:14px; cursor:pointer; color:#2b2a27;
+    border:1px solid rgba(0,0,0,.5); text-shadow:0 1px 0 rgba(255,255,255,.5);
+    background:var(--brush), linear-gradient(180deg, #e4e3df, #b6b5b0); box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 6px rgba(0,0,0,.35); }
+  button:active { transform:translateY(.5px); box-shadow:inset 0 2px 5px rgba(0,0,0,.3); }
+  button:disabled { opacity:.6; cursor:progress; }
+  button:focus-visible { outline:2px solid var(--amber); outline-offset:3px; }
+  #err { color:var(--err); font-size:14px; min-height:1.5em; margin-top:12px; text-align:center; }
+  /* diskré språkvalg nederst på platen */
+  .lang { display:flex; justify-content:center; align-items:center; gap:2px; margin-top:6px; }
+  .lang button { margin:0; width:auto; min-height:44px; min-width:44px; padding:0 10px; border:0; border-radius:10px; background:none; box-shadow:none;
+    color:var(--faint); text-shadow:none; font-size:12px; font-weight:600; letter-spacing:.16em; }
+  .lang button[aria-pressed="true"] { color:var(--fg); }
+  .lang button:active { transform:none; box-shadow:none; }
+  .lang .sep { width:1px; height:12px; background:rgba(255,236,210,.18); }
+</style>
+</head>
+<body>
+<main>
+  <form class="plate" id="f" autocomplete="off">
+    <div class="strip"><span class="mark">Sumel</span><span class="lampl" aria-hidden="true"><span class="lamp"></span>Remote</span></div>
+    <div class="head"><div class="brand"><span class="mark">Sumel</span><span class="sub" data-i18n="sub">fjernkontroll for Platin SM450</span></div><span class="well" aria-hidden="true"><span class="lamp"></span></span></div>
+    <div class="body">
+      <h1 data-i18n="title">Koble til</h1>
+      <p data-i18n="lead">Skriv inn tilgangskoden. Klikk SUMEL-ikonet ved klokken på PC-en – koden står i menyen. Den står også under «Mer» i appen på PC-en. Du trenger den bare én gang på denne enheten.</p>
+      <label for="code" data-i18n="label">Tilgangskode</label>
+      <input id="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="6 sifre" data-i18n-ph="ph" autocomplete="one-time-code" autofocus>
+      <button type="submit" data-i18n="submit">Koble til</button>
+      <div id="err" role="alert"></div>
+      <div class="lang" role="group" aria-label="Språk / Language"><button type="button" data-lang="no" lang="nb" aria-pressed="false">NO</button><span class="sep" aria-hidden="true"></span><button type="button" data-lang="en" lang="en" aria-pressed="false">EN</button></div>
+    </div>
+  </form>
+</main>
+<script>
+// språk: samme lagrede valg som appen ('lemus_lang'); standard norsk hvis nettleseren er norsk, ellers engelsk
+const I18N = {
+  no: { doc: "SUMEL – logg inn", sub: "fjernkontroll for Platin SM450", title: "Koble til",
+    lead: "Skriv inn tilgangskoden. Klikk SUMEL-ikonet ved klokken på PC-en – koden står i menyen. Den står også under «Mer» i appen på PC-en. Du trenger den bare én gang på denne enheten.",
+    label: "Tilgangskode", ph: "6 sifre", submit: "Koble til", busy: "Kobler til …", tooMany: "For mange forsøk. Vent litt.",
+    wrong: "Feil kode. Prøv igjen.", generic: "Noe gikk galt", noPc: "Fikk ikke kontakt med PC-en." },
+  en: { doc: "SUMEL – sign in", sub: "remote for Platin SM450", title: "Connect",
+    lead: "Enter the access code. Click the SUMEL icon by the clock on the PC – the code is in the menu. It’s also under “More” in the app on the PC. You only need it once on this device.",
+    label: "Access code", ph: "6 digits", submit: "Connect", busy: "Connecting …", tooMany: "Too many attempts. Please wait.",
+    wrong: "Wrong code. Try again.", generic: "Something went wrong", noPc: "Couldn’t reach the PC.",
+    missing: "Enter the access code.", badReq: "Invalid request. Try again." },
+};
+let LANG = (() => {
+  try { const v = localStorage.getItem("lemus_lang"); if (v === "no" || v === "en") return v; } catch (e) { /* */ }
+  const ls = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ""]).map(l => String(l).toLowerCase());
+  return ls.some(l => /^(nb|nn|no)\b/.test(l)) ? "no" : "en";
+})();
+const t = k => I18N[LANG][k] ?? I18N.no[k];
+// andre feilmeldinger fra serveren er norske: kjente oversettes, ukjente vises som «Noe gikk galt» på engelsk
+const ERR_EN = { "tilgangskode mangler": "missing", "ugyldig JSON": "badReq" };
+function showErr() {
+  const k = err.dataset.k;
+  if (k === "raw") err.textContent = LANG === "no" ? err.dataset.raw : (ERR_EN[err.dataset.raw] ? t(ERR_EN[err.dataset.raw]) : t("generic"));
+  else if (k) err.textContent = t(k);
+}
+function applyLang() {
+  document.documentElement.lang = LANG === "no" ? "nb" : "en";
+  document.title = t("doc");
+  for (const el of document.querySelectorAll("[data-i18n]")) el.textContent = t(el.dataset.i18n);
+  for (const el of document.querySelectorAll("[data-i18n-ph]")) el.placeholder = t(el.dataset.i18nPh);
+  for (const b of document.querySelectorAll("[data-lang]")) b.setAttribute("aria-pressed", String(b.dataset.lang === LANG));
+}
+for (const b of document.querySelectorAll("[data-lang]")) b.onclick = () => {
+  LANG = b.dataset.lang;
+  try { localStorage.setItem("lemus_lang", LANG); } catch (e) { /* */ }
+  applyLang(); showErr();
+  if (busy) btn.textContent = t("busy");
+};
+const form = document.getElementById("f"), inp = document.getElementById("code"), btn = form.querySelector("button"), err = document.getElementById("err");
+let busy = false;
+async function submit() {
+  if (busy) return;               // ingen dobbel innsending
+  busy = true; btn.disabled = true; btn.textContent = t("busy"); err.textContent = ""; err.dataset.k = "";
+  let done = false;
+  try {
+    const r = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: inp.value.trim() }) });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok) { done = true; location.replace("/"); return; }
+    const k = r.status === 429 ? "tooMany" : j.error === "feil kode" ? "wrong" : j.error ? "raw" : "generic";
+    err.dataset.k = k; err.dataset.raw = j.error ? String(j.error) : ""; showErr();
+  } catch { err.dataset.k = "noPc"; err.textContent = t("noPc"); }
+  finally {
+    if (!done) { busy = false; btn.disabled = false; btn.textContent = t("submit"); inp.focus(); inp.select(); }
+  }
+}
+form.onsubmit = e => { e.preventDefault(); submit(); };
+// talltastaturet på iPhone har ingen retur-tast: send automatisk når seks sifre er skrevet
+inp.addEventListener("input", () => { if (/^\d{6}$/.test(inp.value.trim())) submit(); });
+applyLang();
+</script>
+</body>
+</html>
