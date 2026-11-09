@@ -131,6 +131,7 @@ def encode_band_params(type_code: int, freq: int, q: float | None, gain: float |
 # produsentens tuning (delefilter, høyttaler-EQ). SM450 tar trygt imot tre EQ-bånd (plass 0-2), som i Platin-appen. Et fjerde bånd (plass 3)
 # ga et smell i høyttalerne og rar lyd 8.11.2026. Skriving av koeffisienter til plass 3 og
 # høyere er derfor sperret her, på laveste nivå, slik at ingen del av programmet kan gjøre det.
+# Det samme gjelder av/på og sletting (08 06): plass 3 og høyere røres ikke i det hele tatt.
 MAX_BANDS = 3
 
 
@@ -178,9 +179,11 @@ BAND_DELETE, BAND_OFF, BAND_ON = 0x00, 0x01, 0x02
 def set_band_state(index: int, state: int) -> bytes:
     """Båndstatus: ``08 06 01 <indeks> 01 <00 slett | 01 av | 02 på>`` (opptak 8.11.2026).
 
-    Høyttaleren bekrefter med ``08 06 02 <indeks> 01 <status>``.
+    Høyttaleren bekrefter med ``08 06 02 <indeks> 01 <status>``. Bare plass 0-2: også av/på og
+    sletting på plass 3 og høyere kan treffe produsentens tuning (se MAX_BANDS).
     """
-    if not 0 <= index <= 9 or state not in (BAND_DELETE, BAND_OFF, BAND_ON):
+    _check_write_index(index)
+    if state not in (BAND_DELETE, BAND_OFF, BAND_ON):
         raise ValueError("ugyldig bånd eller status")
     return control_frame(0x08, 0x06, bytes([0x01, index, 0x01, state]))
 

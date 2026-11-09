@@ -70,6 +70,8 @@ def validate_bands(bands) -> list[dict]:
         raise ValueError(f"bands må være en liste med høyst {p.MAX_BANDS} bånd (grensen i SM450)")
     out = []
     for b in bands:
+        if not isinstance(b, dict):
+            raise ValueError("hvert bånd må være et objekt")
         t = int(b.get("type", PARAMETRIC))
         freq = int(b["freq"])
         q = None if b.get("q") is None else p.readback_safe_q(float(b["q"]))  # leses tilbake likt

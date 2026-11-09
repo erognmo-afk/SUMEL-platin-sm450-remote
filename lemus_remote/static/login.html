@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>
-/* samme frontplate-valg som appen ('lemus_front'), satt før første tegning: «plain» (standard) eller «alu» */
+/* samme frontplate-valg som appen ('lemus_front'), satt før første tegning: «alu» (standard) eller «plain» */
 (function () { var f = "alu"; try { if (localStorage.getItem("lemus_front") === "plain") f = "plain"; } catch (e) { /* privat modus */ } document.documentElement.setAttribute("data-front", f); })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -36,7 +36,7 @@
   .mark { display:block; font-weight:300; font-size:19px; line-height:1; letter-spacing:.42em; text-transform:uppercase; color:var(--fg); }
   .mark::after { content:""; display:block; width:22px; height:2px; margin-top:7px; border-radius:1px; background:linear-gradient(90deg, #6b4529, #4b2f1d); }
   .sub { display:block; margin-top:6px; font-size:12px; letter-spacing:.03em; color:var(--muted); }
-  .well { margin-left:auto; margin-top:-3px; flex:none; display:flex; align-items:center; padding:7px 9px; border-radius:8px;
+  .well { margin-left:auto; margin-top:-3px; flex:none; display:flex; align-items:center; padding:7px 9px; border-radius:3px;
     background:linear-gradient(180deg, #0c0b0a, #131210); box-shadow:inset 0 1px 3px rgba(0,0,0,.85), inset 0 0 0 1px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.05); }
   .lamp { width:6px; height:6px; border-radius:50%; background:#fffef9; box-shadow:0 0 5px 1px rgba(255,250,236,.75), 0 0 12px rgba(255,246,228,.25); }
   .body { padding:22px 14px 22px; }
@@ -45,8 +45,11 @@
     background:var(--brush), linear-gradient(180deg, #dddcd7 0%, #c4c3be 55%, #b0afaa 100%); box-shadow:inset 0 1px 0 rgba(255,255,255,.8); }
   .strip .mark { font-size:13px; font-weight:500; letter-spacing:.46em; color:#34332f; text-shadow:0 1px 0 rgba(255,255,255,.65); }
   .strip .mark::after { display:none; }
-  .lampl { margin-left:auto; display:flex; align-items:center; gap:7px; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#3f3e3a; font-weight:600; text-shadow:0 1px 0 rgba(255,255,255,.55); }
-  .lampl .lamp { box-shadow:0 0 0 1.5px rgba(40,38,34,.55), 0 0 6px 2px rgba(255,253,244,1); }
+  /* lampen sitter i et lite mørkt indikatorvindu felt inn i aluminiumen, som i appen: tent = hvit glød og lys tekst */
+  .lampl { margin-left:auto; display:flex; align-items:center; gap:6px; padding:5px 12px; border-radius:3px; font-size:10px; line-height:14px;
+    letter-spacing:.14em; text-transform:uppercase; color:#cfc9bf; font-weight:600; white-space:nowrap;
+    background:linear-gradient(180deg, #0c0b0a, #151412);
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.9), inset 0 0 0 1px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.75); }
   html[data-front="alu"] .plate { padding:0; }
   html[data-front="alu"] .plate::before, html[data-front="alu"] .plate::after { display:none; }
   html[data-front="alu"] .head { display:none; }
@@ -54,21 +57,21 @@
   html[data-front="alu"] .body { padding:26px 22px 24px; }
   h1 { font-weight:300; font-size:24px; margin:0 0 8px; letter-spacing:.01em; }
   p { color:var(--muted); font-size:14px; margin:0 0 20px; }
-  label { display:block; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--faint); font-weight:600; margin-bottom:8px; }
-  input { width:100%; font:inherit; font-size:28px; letter-spacing:.4em; text-align:center; padding:14px 10px 14px calc(10px + .4em); border-radius:14px;
+  label { display:block; font-size:13px; letter-spacing:.01em; color:var(--muted); font-weight:500; margin-bottom:8px; }
+  input { width:100%; font:inherit; font-size:28px; letter-spacing:.4em; text-align:center; padding:14px 10px 14px calc(10px + .4em); border-radius:4px;
     border:1px solid rgba(255,236,210,.13); background:#0e0d0c; color:var(--fg); font-variant-numeric:tabular-nums; box-shadow:inset 0 1px 3px rgba(0,0,0,.6); }
   input::placeholder { color:#5c5852; letter-spacing:.08em; font-size:20px; }
   input:focus { outline:none; border-color:rgba(242,168,78,.6); box-shadow:inset 0 1px 3px rgba(0,0,0,.6), 0 0 0 3px rgba(242,168,78,.15); }
-  button { margin-top:16px; width:100%; min-height:50px; font:inherit; font-weight:600; border-radius:14px; cursor:pointer; color:#2b2a27;
+  button { margin-top:16px; width:100%; min-height:50px; font:inherit; font-weight:600; border-radius:4px; cursor:pointer; color:#2b2a27;
     border:1px solid rgba(0,0,0,.5); text-shadow:0 1px 0 rgba(255,255,255,.5);
     background:var(--brush), linear-gradient(180deg, #e4e3df, #b6b5b0); box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 6px rgba(0,0,0,.35); }
   button:active { transform:translateY(.5px); box-shadow:inset 0 2px 5px rgba(0,0,0,.3); }
   button:disabled { opacity:.6; cursor:progress; }
-  button:focus-visible { outline:2px solid var(--amber); outline-offset:3px; }
+  button:focus-visible { outline:2px solid var(--amber); outline-offset:3px; border-radius:4px; }
   #err { color:var(--err); font-size:14px; min-height:1.5em; margin-top:12px; text-align:center; }
   /* diskré språkvalg nederst på platen */
   .lang { display:flex; justify-content:center; align-items:center; gap:2px; margin-top:6px; }
-  .lang button { margin:0; width:auto; min-height:44px; min-width:44px; padding:0 10px; border:0; border-radius:10px; background:none; box-shadow:none;
+  .lang button { margin:0; width:auto; min-height:44px; min-width:44px; padding:0 10px; border:0; border-radius:3px; background:none; box-shadow:none;
     color:var(--faint); text-shadow:none; font-size:12px; font-weight:600; letter-spacing:.16em; }
   .lang button[aria-pressed="true"] { color:var(--fg); }
   .lang button:active { transform:none; box-shadow:none; }

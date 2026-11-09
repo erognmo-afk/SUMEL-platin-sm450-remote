@@ -26,7 +26,8 @@
   --red:#d2553f; --err:#e48a6e; --ok:#e9e3d6;
   --alu-hi:#f2f1ed; --alu:#c9c8c3; --alu-lo:#8d8c87; --alu-ink:#3b3a37;
   --walnut:#4b2f1d; --walnut-2:#6b4529;
-  --radius:18px; --radius-s:12px;
+  /* én radius-skala: kort 6 px, kontroller 4 px, glass/display/taster 3 px; kabinett og dekk 0; runde knapper, knotter og lamper 50 % */
+  --radius:6px; --radius-s:4px; --radius-xs:3px;
   --sans:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
   --display:-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
   --mono:ui-monospace, "SF Mono", Menlo, Consolas, "Cascadia Mono", monospace;
@@ -47,7 +48,7 @@ button, input, select, textarea { font:inherit; color:inherit; }
 button { touch-action:manipulation; cursor:pointer; }
 button:disabled, [aria-disabled="true"] { cursor:not-allowed; }
 :focus { outline:none; }
-:focus-visible { outline:2px solid var(--amber); outline-offset:3px; border-radius:10px; }
+:focus-visible { outline:2px solid var(--amber); outline-offset:3px; border-radius:var(--radius-s); }
 [hidden] { display:none !important; }
 .sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
 .num { font-variant-numeric:tabular-nums; }
@@ -75,7 +76,7 @@ header.top { position:sticky; top:0; z-index:20;
 .top-inner { max-width:1320px; margin:0 auto; display:flex; align-items:center; gap:14px; min-height:48px; }
 .brand { display:flex; flex-direction:column; align-items:flex-start; min-width:0; flex:1; }
 .wordmark { font-family:var(--display); font-weight:300; font-size:19px; letter-spacing:.42em; text-transform:uppercase; line-height:1; color:var(--fg); margin-right:-.42em; }
-.brand::after { content:""; display:block; width:22px; height:2px; margin-top:7px; border-radius:1px; order:1;
+.brand::after { content:""; display:block; width:22px; height:2px; margin-top:7px; border-radius:0; order:1;
   background:var(--grain-h), linear-gradient(90deg, #6b4529, #4b2f1d); opacity:.9; }
 /* undertittel under SUMEL-logoen (under den lille valnøttstreken) */
 .brand-sub { order:2; margin-top:6px; font-size:11px; line-height:1.2; letter-spacing:.04em; color:var(--faint); white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis; }
@@ -99,12 +100,13 @@ nav.tabs button { flex:1; min-width:0; max-width:120px; min-height:50px; border:
   font-size:11px; font-weight:500; letter-spacing:.01em; position:relative; }
 nav.tabs svg { width:23px; height:23px; stroke:currentColor; fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
 nav.tabs button[aria-current="page"] { color:var(--fg); }
-nav.tabs button[aria-current="page"]::before { content:""; position:absolute; top:-6px; width:18px; height:2px; border-radius:2px; background:var(--amber); }
+/* valgt fane (telefon): nøytral strek over ikonet – ravgult er forbeholdt lyd og status */
+nav.tabs button[aria-current="page"]::before { content:""; position:absolute; top:-6px; width:18px; height:2px; border-radius:1px; background:var(--fg-2); }
 
 /* ---------------- banner */
 .banner { display:none; max-width:1320px; margin:12px auto 0; padding:0 16px; }
 .banner.show { display:block; }
-.banner > div { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:14px;
+.banner > div { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:var(--radius-s);
   background:linear-gradient(180deg, #2a2420, #221d1a); border:1px solid rgba(242,168,78,.22); font-size:14px; }
 .banner.err > div { border-color:rgba(228,138,110,.35); background:linear-gradient(180deg, #2c1f1b, #221917); }
 .banner .txt { flex:1; min-width:0; }
@@ -120,7 +122,8 @@ main { max-width:1320px; margin:0 auto; padding:16px calc(16px + var(--safe-r)) 
 .two { display:grid; gap:14px; }
 .card { position:relative; background:linear-gradient(180deg, var(--chassis-2), var(--chassis)); border:1px solid var(--line);
   border-radius:var(--radius); padding:18px; box-shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 18px 40px -18px rgba(0,0,0,.6); }
-.card > h2, .sect { margin:0 0 14px; font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--muted);
+/* kortoverskrifter i setningsstav (versaler med sperring er forbeholdt graveringene på frontplaten) */
+.card > h2, .sect { margin:0 0 14px; font-size:13px; font-weight:500; letter-spacing:.01em; text-transform:none; color:var(--fg-2);
   display:flex; align-items:center; gap:10px; min-height:20px; }
 .card > h2::after, .sect::after { content:""; flex:1; height:1px; background:linear-gradient(90deg, var(--line-2), transparent); }
 .card > h2 .right, .sect .right { order:3; margin-left:auto; letter-spacing:.01em; text-transform:none; font-weight:500; }
@@ -132,7 +135,7 @@ main { max-width:1320px; margin:0 auto; padding:16px calc(16px + var(--safe-r)) 
 .page-title p { color:var(--muted); margin:4px 0 0; font-size:14px; max-width:62ch; }
 
 /* ---------------- buttons */
-.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 16px; border-radius:12px;
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 16px; border-radius:var(--radius-s);
   border:1px solid var(--line-2); background:linear-gradient(180deg, #2c2a27, #232220); color:var(--fg-2); font-size:14px; font-weight:500;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 2px 6px rgba(0,0,0,.25); text-decoration:none; white-space:nowrap; }
 .btn:hover:not(:disabled) { color:var(--fg); border-color:rgba(255,236,210,.2); }
@@ -142,9 +145,12 @@ main { max-width:1320px; margin:0 auto; padding:16px calc(16px + var(--safe-r)) 
 .btn.alu { color:var(--alu-ink); border-color:rgba(0,0,0,.5); text-shadow:0 1px 0 rgba(255,255,255,.5);
   background:var(--brush), linear-gradient(180deg, #e4e3df, #b6b5b0); box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 6px rgba(0,0,0,.35); }
 .btn.alu:hover:not(:disabled) { color:#1f1e1c; }
+/* deaktivert aluminium: matt, mørkere metall med dempet tekst (ikke gjennomsiktig grått på grått) */
+.btn.alu:disabled, .btn.alu[aria-busy="true"] { opacity:1; color:rgba(40,39,36,.62); text-shadow:none;
+  background:var(--brush), linear-gradient(180deg, #8c8b86, #767570); box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 1px 3px rgba(0,0,0,.3); }
 .btn.ghost { background:transparent; box-shadow:none; }
 .btn.danger { color:var(--err); }
-.btn.sm { min-height:36px; padding:0 12px; font-size:13px; border-radius:10px; }
+.btn.sm { min-height:36px; padding:0 12px; font-size:13px; }
 .btn svg { width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; flex:none; }
 .row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .row.end { justify-content:flex-end; }
@@ -158,7 +164,7 @@ main { max-width:1320px; margin:0 auto; padding:16px calc(16px + var(--safe-r)) 
 .round { -webkit-touch-callout:none; user-select:none; -webkit-user-select:none; }
 
 /* hi-fi toggle: button with lamp */
-.tog { display:flex; align-items:center; gap:12px; width:100%; min-height:56px; padding:10px 14px; border-radius:14px; text-align:left;
+.tog { display:flex; align-items:center; gap:12px; width:100%; min-height:56px; padding:10px 14px; border-radius:var(--radius-s); text-align:left;
   border:1px solid rgba(0,0,0,.5); background:linear-gradient(180deg, #2b2926, #211f1d); color:var(--fg-2);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 3px 8px rgba(0,0,0,.35); }
 .tog .lamp { width:8px; height:8px; }
@@ -174,24 +180,22 @@ body.locked .tog .state { color:var(--faint) !important; }
 body.locked :is(.tog, .src, .chip, .mine-item) .lamp:not(.breath) { --c:#3a3632; box-shadow:inset 0 0 0 1px rgba(0,0,0,.45); }
 
 /* segmented */
-.seg { display:inline-flex; padding:3px; gap:3px; border-radius:12px; background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.6); border:1px solid var(--line); }
-.seg button { min-height:38px; padding:0 14px; border:0; border-radius:9px; background:none; color:var(--muted); font-size:13px; font-weight:500; letter-spacing:.01em; text-transform:none; }
+.seg { display:inline-flex; padding:3px; gap:3px; border-radius:var(--radius-s); background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.6); border:1px solid var(--line); }
+.seg button { min-height:38px; padding:0 14px; border:0; border-radius:var(--radius-xs); background:none; color:var(--muted); font-size:13px; font-weight:500; letter-spacing:.01em; text-transform:none; }
+/* valgt knapp: hevet tast (ingen ravgul strek – ravgult er forbeholdt lyd og status) */
 .seg button[aria-pressed="true"] { color:var(--fg); background:linear-gradient(180deg, #34322e, #2a2825); box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 2px 5px rgba(0,0,0,.4); }
-.seg button { position:relative; }
-/* valgt knapp: 2 px ravgul strek nederst, som i fanemenyen */
-.seg button[aria-pressed="true"]::after { content:""; position:absolute; left:50%; bottom:4px; width:16px; height:2px; margin-left:-8px; border-radius:2px; background:var(--amber); }
 .seg button:disabled { opacity:.45; }
 
 /* fields */
 .field { display:flex; flex-direction:column; gap:6px; min-width:0; }
-.field > span, .field > label { font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--faint); font-weight:600; }
-.inp, select.inp { width:100%; min-height:46px; padding:0 12px; border-radius:11px; border:1px solid var(--line-2); background:var(--well);
+.field > span, .field > label { font-size:13px; font-weight:500; letter-spacing:.01em; text-transform:none; color:var(--muted); }
+.inp, select.inp { width:100%; min-height:46px; padding:0 12px; border-radius:var(--radius-s); border:1px solid var(--line-2); background:var(--well);
   color:var(--fg); font-size:16px; box-shadow:inset 0 1px 3px rgba(0,0,0,.55); }
 .inp:focus { border-color:rgba(242,168,78,.6); box-shadow:inset 0 1px 3px rgba(0,0,0,.55), 0 0 0 3px rgba(242,168,78,.15); }
 .inp:disabled { color:var(--faint); }
 select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
   background:var(--well) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23a39d93' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 14px center; }
-.stepper { display:flex; align-items:stretch; gap:0; border-radius:11px; overflow:hidden; border:1px solid var(--line-2); background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.55); }
+.stepper { display:flex; align-items:stretch; gap:0; border-radius:var(--radius-s); overflow:hidden; border:1px solid var(--line-2); background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.55); }
 .stepper .inp { border:0; box-shadow:none; border-radius:0; background:transparent; text-align:center; min-width:0; padding:0 4px; font-variant-numeric:tabular-nums; }
 .stepper button { width:44px; min-height:44px; flex:none; border:0; background:linear-gradient(180deg, #2b2926, #211f1d); color:var(--fg-2); font-size:19px; line-height:1; }
 .stepper button:first-child { border-right:1px solid var(--line); }
@@ -203,7 +207,7 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 
 /* chips */
 .chips { display:flex; flex-wrap:wrap; gap:8px; }
-.chip { display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 15px; border-radius:22px; font-size:14px;
+.chip { display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 15px; border-radius:var(--radius-s); font-size:14px;
   border:1px solid rgba(0,0,0,.5); background:linear-gradient(180deg, #2b2926, #211f1d); color:var(--fg-2);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 2px 6px rgba(0,0,0,.3); }
 .chip .lamp { width:6px; height:6px; }
@@ -211,15 +215,16 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 .chip.busy { color:var(--muted); }
 .chip:disabled { opacity:.45; }
 /* statusmerker: rolig tekst, ikke versaler */
-.tag { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:500; padding:2px 9px; border-radius:6px;
+.tag { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:500; padding:2px 9px; border-radius:var(--radius-xs);
   border:1px solid var(--line-2); color:var(--muted); white-space:nowrap; }
 .tag.amber { color:var(--amber); border-color:rgba(242,168,78,.35); }
 .tag.plain { border-color:transparent; padding:0; }
 .tag.soon { color:var(--faint); border-style:dashed; }
 
 /* ---------------- faceplate (the virtual amplifier)
-   Kabinett med valnøttsider og rette ytterhjørner (treverket er ikke avrundet).
-   Ingen aluminiumsliste: toppen av frontplaten er ren grafitt med en tynn mørk kant. */
+   Kabinett med valnøttsider og rette ytterhjørner (treverket er ikke avrundet i noen variant).
+   Reglene her er grunnlaget og gir varianten UTEN aluminiumslist (html[data-front="plain"]): toppen av frontplaten
+   er ren grafitt med en tynn mørk kant. Standard er MED list (html[data-front="alu"], egne regler nederst). */
 .faceplate { position:relative; border-radius:0; overflow:hidden; isolation:isolate; padding:0 12px;
   background:radial-gradient(130% 70% at 50% 0%, #2a2825 0%, #1f1e1c 48%, #191816 100%);
   box-shadow:0 0 0 1px rgba(0,0,0,.75), 0 30px 60px -20px rgba(0,0,0,.8), 0 10px 20px -10px rgba(0,0,0,.5); }
@@ -231,9 +236,9 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
   box-shadow:inset 0 1px 0 rgba(0,0,0,.55), inset 0 2px 0 rgba(255,255,255,.035); }
 /* øverst i frontplaten: modellnavnet som liten, dempet gravering og lampene i en mørk brønn */
 .fp-head { display:flex; align-items:center; gap:14px; padding:12px 16px 0; min-width:0; }
-.fp-model { min-width:0; font-size:11px; font-weight:500; letter-spacing:.04em; color:#857f76;
+.fp-model { min-width:0; font-size:11px; font-weight:500; letter-spacing:.04em; color:#948e84;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-shadow:0 -1px 0 rgba(0,0,0,.6); }
-.fp-lamps { margin-left:auto; flex:none; display:flex; align-items:center; gap:14px; padding:6px 12px; border-radius:8px;
+.fp-lamps { margin-left:auto; flex:none; display:flex; align-items:center; gap:14px; padding:6px 12px; border-radius:var(--radius-xs);
   background:linear-gradient(180deg, #0c0b0a, #131210); box-shadow:inset 0 1px 3px rgba(0,0,0,.85), inset 0 0 0 1px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.05); }
 .fp-lamps span { display:flex; align-items:center; gap:6px; font-size:11px; line-height:14px; letter-spacing:.12em; text-transform:uppercase;
   color:#8f897f; font-weight:600; white-space:nowrap; }
@@ -250,7 +255,7 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 .fp-left, .fp-right { display:flex; flex-direction:column; align-items:center; width:100%; min-width:0; }
 .vol-head { display:flex; align-items:center; gap:8px; }
 /* displayet: mørkt glass med kilde og EQ-kurve (som et VFD-vindu); hele vinduet åpner EQ-fanen */
-.fp-display { display:block; width:100%; margin:0; padding:10px 14px 8px; border:0; border-radius:14px; text-align:left; color:var(--fg-2);
+.fp-display { display:block; width:100%; margin:0; padding:10px 14px 8px; border:0; border-radius:var(--radius-xs); text-align:left; color:var(--fg-2);
   background:radial-gradient(120% 140% at 50% 0%, #1c1b18, #0d0c0b 75%);
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.85), inset 0 3px 12px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.05); }
 .fp-display > span { display:flex; align-items:baseline; gap:10px; min-width:0; }
@@ -264,7 +269,7 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 .fp-display .d-go { display:inline-flex; align-items:center; gap:3px; color:var(--fg-2); font-size:11px; font-weight:600; letter-spacing:.16em; }
 .fp-display .d-go svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 @media (hover:hover) { .fp-display:hover .d-go { color:var(--amber-hi); } }
-.fp-display:focus-visible { outline:2px solid var(--amber); outline-offset:3px; border-radius:14px; }
+.fp-display:focus-visible { outline:2px solid var(--amber); outline-offset:3px; border-radius:var(--radius-xs); }
 .fp-display.dim .d-src { color:var(--faint); text-shadow:none; }
 .fp-display.dim .d-play, .fp-display.dim .d-bot, .fp-display.dim .d-go { color:var(--faint); }
 @media (hover:hover) { .fp-display.dim:hover .d-go { color:var(--muted); } }
@@ -276,9 +281,18 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 .knob-wrap .knob { touch-action:pan-y; cursor:ns-resize; -webkit-touch-callout:none; }
 .knob-wrap { -webkit-touch-callout:none; }
 .knob-wrap.armed .knob { box-shadow:0 0 0 2px rgba(242,168,78,.55), 0 24px 40px rgba(0,0,0,.72), 0 8px 12px rgba(0,0,0,.5); }
-/* demping: liten ravgul lampe midt på volumhjulet (roterer ikke) */
-.knob .mute-lamp { position:absolute; left:50%; top:50%; width:8px; height:8px; margin:-4px 0 0 -4px; z-index:2; display:none; }
-.knob-wrap.muted .knob .mute-lamp { display:block; }
+/* demping: et diskret gravert høyttalersymbol midt på volumhjulet (roterer ikke) viser at et trykk der demper.
+   Tydeligere ved hover/fokus på PC; lyser ravgult med kryss i stedet for lydbølger når lyden er dempet. */
+.knob .mute-ico { position:absolute; left:50%; top:50%; width:16%; height:16%; transform:translate(-50%, -50%); z-index:2; pointer-events:none; overflow:visible;
+  fill:none; stroke:rgba(40,39,36,.75); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.75)); opacity:.42; transition:opacity .2s, filter .2s; }
+.knob .mute-ico .x { display:none; }
+@media (hover:hover) and (pointer:fine) { .knob-wrap:not(.dis):not(.muted):hover .knob .mute-ico { opacity:.85; } }
+.knob-wrap:focus-visible .knob .mute-ico { opacity:.85; }
+.knob-wrap.muted .knob .mute-ico { opacity:1; stroke:#e8902c; filter:drop-shadow(0 0 1.5px rgba(242,168,78,.9)) drop-shadow(0 0 5px rgba(242,168,78,.5)); }
+.knob-wrap.muted .knob .mute-ico .b { fill:#f2a84e; }
+.knob-wrap.muted .knob .mute-ico .w { display:none; }
+.knob-wrap.muted .knob .mute-ico .x { display:inline; }
 .knob-wrap.dis .knob { cursor:not-allowed; }
 @media (pointer:fine) { .knob-wrap { cursor:ns-resize; } .knob-wrap.dis { cursor:not-allowed; } }
 .knob-wrap.turning, .knob-wrap.turning .knob { cursor:ns-resize; }
@@ -292,7 +306,7 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 .scale line.maj.lit { stroke:var(--amber-hi); }
 .scale .lit-g line.lit { filter:drop-shadow(0 0 1.5px rgba(242,168,78,.6)); }
 .scale text { fill:#a39d93; font:500 10px var(--sans); letter-spacing:.02em; text-anchor:middle; dominant-baseline:central; }
-.scale .ghost { stroke:var(--fg); stroke-width:2; opacity:0; }
+.scale .ghost { stroke:var(--fg); stroke-width:2; opacity:0; transition:opacity .2s; }
 .scale .ghost.show { opacity:.75; }
 .knob { position:absolute; inset:var(--inset, 19%); border-radius:50%;
   box-shadow:0 0 0 1px rgba(0,0,0,.75), 0 24px 40px rgba(0,0,0,.72), 0 8px 12px rgba(0,0,0,.5); }
@@ -332,7 +346,8 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 .vol-num.mute.dim { color:var(--faint); }
 .vol-state.stop { color:var(--amber-hi); }
 .fp-display .d-play.mute { color:var(--amber); font-weight:600; letter-spacing:.06em; }
-.vol-state { height:18px; margin-top:6px; font-size:12px; letter-spacing:.04em; color:var(--faint); display:flex; gap:7px; align-items:center; }
+.vol-state { height:18px; margin-top:6px; font-size:12px; letter-spacing:.04em; color:var(--faint); display:flex; gap:7px; align-items:center; transition:opacity .25s ease; }
+.vol-state.hide { opacity:0; }
 .vol-state.pend { color:var(--amber-hi); }
 .vol-state.err { color:var(--err); }
 .vol-state .lamp { width:5px; height:5px; }
@@ -354,7 +369,7 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 .inputs > .engr { text-align:center; }
 /* inngangsvelgeren: en rad små, lave taster som på en hi-fi-front; lampen står til venstre for teksten */
 .inputs .sel { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:6px; margin-top:10px; }
-.src { display:flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:0 4px; border-radius:10px; min-width:0; overflow:hidden;
+.src { display:flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:0 4px; border-radius:var(--radius-xs); min-width:0; overflow:hidden;
   border:1px solid rgba(0,0,0,.55); background:linear-gradient(180deg, #2a2825, #201f1d); color:var(--muted);
   font-size:12px; letter-spacing:.06em; text-transform:uppercase; font-weight:600; line-height:1; white-space:nowrap;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 2px 5px rgba(0,0,0,.35); }
@@ -381,7 +396,7 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 /* Lyd og Profil: én lav rad under forsterkeren (på mobil to korte seksjoner) */
 .deck-sec { display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:center; gap:8px 12px; padding:12px 14px 14px; min-width:0; }
 .deck-sec + .deck-sec { border-top:1px solid var(--line); }
-.deck-h { grid-column:1; margin:0; font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+.deck-h { grid-column:1; margin:0; font-size:13px; font-weight:500; letter-spacing:.01em; text-transform:none; color:var(--fg-2); }
 .deck-sec > .togs, .deck-sec > .chips { grid-column:1 / -1; }
 .deck-all { grid-column:2; grid-row:1; }
 /* tonehjulene sitter på frontplaten */
@@ -405,16 +420,16 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 .deck .tog .t small { font-size:11.5px; line-height:1.3; }
 
 /* screen (dark analyser glass) */
-.screen { position:relative; border-radius:14px; overflow:hidden;
+.screen { position:relative; border-radius:var(--radius-xs); overflow:hidden;
   background:radial-gradient(120% 90% at 50% 0%, #1b1a17, #0f0e0d 70%);
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.8), inset 0 2px 10px rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.05); }
 .screen:has(canvas:focus-visible) { box-shadow:inset 0 0 0 1px rgba(0,0,0,.8), inset 0 2px 10px rgba(0,0,0,.8), 0 0 0 2px var(--amber); }
 .screen canvas { display:block; width:100%; }
 #eqCanvas { height:320px; touch-action:pan-y; cursor:crosshair; }
-#eqCanvas:focus-visible { outline-offset:-3px; border-radius:14px; }
+#eqCanvas:focus-visible { outline-offset:-3px; border-radius:var(--radius-xs); }
 #eqCanvas.dis { cursor:not-allowed; }
 .screen .overlay { position:absolute; left:44px; top:10px; display:flex; gap:8px; align-items:center; pointer-events:none; }
-.screen .overlay-r { position:absolute; right:10px; top:6px; pointer-events:none; padding:0 8px; border-radius:8px; min-height:28px; }
+.screen .overlay-r { position:absolute; right:10px; top:6px; pointer-events:none; padding:0 8px; border-radius:var(--radius-xs); min-height:28px; }
 .screen .overlay-r:not(:empty) { background:rgba(18,17,16,.82); }
 
 /* EQ view */
@@ -424,13 +439,13 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 .eq-mode #modeHint { flex:1 1 240px; min-width:0; }
 /* Kurve-EQ */
 #curveCanvas { height:320px; touch-action:pan-y; cursor:ns-resize; }
-#curveCanvas:focus-visible { outline-offset:-3px; border-radius:14px; }
+#curveCanvas:focus-visible { outline-offset:-3px; border-radius:var(--radius-xs); }
 .legend i.dash { background:none; height:0; border-top:2px dashed rgba(236,231,223,.75); }
 .curve-confirm { margin-top:12px; }
 .fit-head { display:flex; align-items:baseline; gap:10px; margin:-2px 0 12px; min-height:40px; }
 .fit-head .big { font-family:var(--display); font-weight:300; font-size:32px; line-height:1; color:var(--fg); }
 .fit-list { display:grid; gap:8px; }
-.fit-row { display:flex; align-items:center; gap:10px; min-height:44px; padding:6px 12px 6px 8px; border-radius:12px; background:var(--well);
+.fit-row { display:flex; align-items:center; gap:10px; min-height:44px; padding:6px 12px 6px 8px; border-radius:var(--radius-s); background:var(--well);
   border:1px solid var(--line); font-size:13.5px; font-variant-numeric:tabular-nums; }
 .fit-row .n { width:26px; height:26px; border-radius:50%; display:grid; place-items:center; flex:none; font-size:12px; font-weight:600;
   background:linear-gradient(180deg, #e8e6e1, #bdbcb7); color:#2a2927; }
@@ -443,7 +458,7 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 .saving .lamp { width:6px; height:6px; }
 .saving.err { color:var(--err); }
 .bandlist { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
-.bchip { display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:0 12px 0 6px; border-radius:22px; font-size:13px;
+.bchip { display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:0 12px 0 6px; border-radius:var(--radius-s); font-size:13px;
   border:1px solid var(--line-2); background:var(--well); color:var(--fg-2); font-variant-numeric:tabular-nums; }
 .bchip .n { width:26px; height:26px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:600;
   background:linear-gradient(180deg, #e8e6e1, #bdbcb7); color:#2a2927; }
@@ -452,7 +467,7 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 .bchip[aria-pressed="true"] { border-color:rgba(242,168,78,.6); color:var(--fg); box-shadow:0 0 0 1px rgba(242,168,78,.25); }
 .bchip[aria-pressed="true"] .n { background:var(--amber); color:#2a1a08; }
 .bchip.pend { color:var(--amber-hi); }
-.eq-quick { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:12px; padding:10px; border-radius:14px; background:rgba(255,236,210,.03); border:1px solid var(--line); }
+.eq-quick { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:12px; padding:10px; border-radius:var(--radius-s); background:rgba(255,236,210,.03); border:1px solid var(--line); }
 .eq-quick .qn { width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-size:13px; font-weight:600; background:var(--amber); color:#2a1a08; flex:none; }
 .eq-quick .stepper { flex:1 1 150px; }
 .eq-quick .seg button { min-width:44px; padding:0 10px; }
@@ -460,7 +475,7 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 #qVal { white-space:nowrap; min-width:96px; }
 .eq-quick output { flex:1; min-width:0; display:grid; place-items:center; font-size:16px; font-variant-numeric:tabular-nums; color:var(--fg); }
 .hint { margin-top:10px; font-size:12.5px; color:var(--faint); }
-.hint kbd { font:600 11px var(--mono); padding:1px 5px; border-radius:4px; border:1px solid var(--line-2); color:var(--muted); background:var(--well); }
+.hint kbd { font:600 11px var(--mono); padding:1px 5px; border-radius:var(--radius-xs); border:1px solid var(--line-2); color:var(--muted); background:var(--well); }
 .hint .touch-only { display:none; }
 @media (pointer:coarse) { .hint .kbd-only { display:none; } .hint .touch-only { display:inline; } }
 .insp-grid { display:grid; grid-template-columns:1fr; gap:12px; }
@@ -471,7 +486,7 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 .insp-head .meta { flex:1; min-width:0; }
 .insp-head .meta b { display:block; font-weight:500; font-size:16px; }
 .insp-head .meta span { font-size:13px; color:var(--muted); }
-.note { font-size:13px; color:var(--muted); line-height:1.5; padding:12px 14px; border-radius:12px; background:rgba(255,236,210,.03); border:1px solid var(--line); }
+.note { font-size:13px; color:var(--muted); line-height:1.5; padding:12px 14px; border-radius:var(--radius-s); background:rgba(255,236,210,.03); border:1px solid var(--line); }
 .note.warn { border-color:rgba(242,168,78,.25); background:rgba(242,168,78,.05); color:var(--fg-2); }
 .empty { padding:22px 8px; text-align:center; color:var(--muted); font-size:14px; }
 .ab-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
@@ -482,7 +497,7 @@ select.inp { appearance:none; -webkit-appearance:none; padding-right:36px;
 .mine { display:flex; flex-direction:column; }
 .mine-item { display:grid; grid-template-columns:96px 1fr; gap:12px; align-items:center; padding:14px 0; border-top:1px solid var(--line); }
 .mine-item:first-child { border-top:0; padding-top:0; }
-.mine-item canvas { width:96px; height:44px; border-radius:8px; background:#121110; box-shadow:inset 0 1px 3px rgba(0,0,0,.6); }
+.mine-item canvas { width:96px; height:44px; border-radius:var(--radius-xs); background:#121110; box-shadow:inset 0 1px 3px rgba(0,0,0,.6); }
 .mine-item .nm { display:flex; align-items:center; gap:8px; font-size:15px; color:var(--fg); font-weight:500; min-width:0; }
 .mine-item .nm .nmt { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .mine-item .nm .tag { flex:none; }
@@ -518,12 +533,12 @@ dl.kv dt { color:var(--muted); }
 dl.kv dd { margin:0; color:var(--fg); overflow-wrap:anywhere; }
 .code { font-family:var(--mono); font-size:22px; letter-spacing:.25em; color:var(--amber-hi); }
 .copyline { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-.copyline code { font-family:var(--mono); font-size:14px; color:var(--fg); background:var(--well); padding:10px 12px; border-radius:10px; border:1px solid var(--line); overflow-wrap:anywhere; flex:1; min-width:0; }
+.copyline code { font-family:var(--mono); font-size:14px; color:var(--fg); background:var(--well); padding:10px 12px; border-radius:var(--radius-s); border:1px solid var(--line); overflow-wrap:anywhere; flex:1; min-width:0; }
 .types { width:100%; border-collapse:collapse; font-size:14px; }
 .types td { padding:9px 0; border-top:1px solid var(--line); vertical-align:middle; }
 .types tr:first-child td { border-top:0; }
 .types td:last-child { text-align:right; }
-.log { font:12px/1.55 var(--mono); color:var(--fg-2); background:var(--well); border-radius:10px; border:1px solid var(--line); padding:10px 12px;
+.log { font:12px/1.55 var(--mono); color:var(--fg-2); background:var(--well); border-radius:var(--radius-s); border:1px solid var(--line); padding:10px 12px;
   max-height:300px; overflow:auto; white-space:pre-wrap; word-break:normal; overflow-wrap:anywhere; margin:0; }
 .log .hex { word-break:break-all; }
 .log .p { color:var(--amber); }
@@ -544,7 +559,7 @@ dl.kv dd { margin:0; color:var(--fg); overflow-wrap:anywhere; }
 /* «Ekspert og feilsøking»: lukket som standard */
 details.expert { margin-top:22px; }
 details.expert > summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:12px; min-height:48px; margin:0 2px 4px; color:var(--muted);
-  font-size:11px; letter-spacing:.22em; text-transform:uppercase; font-weight:600; }
+  font-size:13px; letter-spacing:.01em; text-transform:none; font-weight:500; }
 details.expert > summary::-webkit-details-marker { display:none; }
 details.expert > summary::before, details.expert > summary::after { content:""; flex:1; height:1px; background:var(--line-2); }
 details.expert > summary .chev { width:7px; height:7px; border-right:1.6px solid currentColor; border-bottom:1.6px solid currentColor; transform:rotate(45deg); transition:transform .15s; }
@@ -552,7 +567,7 @@ details.expert[open] > summary .chev { transform:rotate(-135deg); }
 details.expert > .two { margin-top:10px; }
 /* QR-kode for iPhone (bare på PC) */
 .qr-row { display:flex; align-items:center; gap:16px; margin-top:14px; }
-.qr-row img { width:148px; height:148px; flex:none; border-radius:10px; background:#fff; padding:8px; image-rendering:pixelated; }
+.qr-row img { width:148px; height:148px; flex:none; border-radius:var(--radius-s); background:#fff; padding:8px; image-rendering:pixelated; }
 .qr-row ol { margin:0; padding-left:18px; font-size:14px; color:var(--fg-2); }
 .qr-row li { margin:4px 0; }
 /* hopp hit fra banneret: ikke under toppfeltet / menyen */
@@ -560,22 +575,23 @@ details.expert > .two { margin-top:10px; }
 .find-res { margin-top:10px; font-size:13.5px; color:var(--fg-2); display:flex; gap:8px; align-items:flex-start; }
 .find-res .lamp { margin-top:7px; }
 .find-res.err { color:var(--err); }
-.expert-sep { display:flex; align-items:center; gap:12px; margin:26px 2px 14px; color:var(--muted); font-size:11px; letter-spacing:.22em; text-transform:uppercase; font-weight:600; }
+.expert-sep { display:flex; align-items:center; gap:12px; margin:26px 2px 14px; color:var(--muted); font-size:13px; letter-spacing:.01em; text-transform:none; font-weight:500; }
 .expert-sep::before, .expert-sep::after { content:""; flex:1; height:1px; background:var(--line-2); }
 
 /* toast */
-.ask-box { position:fixed; z-index:45; left:50%; transform:translateX(-50%); bottom:calc(84px + var(--safe-b)); width:min(520px, calc(100% - 32px));
+/* bekreftelsen nederst («note warn ask-box»): .note.ask-box slår .note.warn, så boksen er ugjennomsiktig over innholdet */
+.note.ask-box { position:fixed; z-index:45; left:50%; transform:translateX(-50%); bottom:calc(84px + var(--safe-b)); width:min(520px, calc(100% - 32px));
   background:linear-gradient(180deg, #33312d, #2a2825); color:var(--fg); box-shadow:0 14px 40px rgba(0,0,0,.55); font-size:14px; }
 #toasts { position:fixed; z-index:40; left:50%; transform:translateX(-50%); bottom:calc(84px + var(--safe-b)); width:min(440px, calc(100% - 32px));
   display:flex; flex-direction:column; gap:8px; pointer-events:none; }
-.toast { pointer-events:none; display:flex; align-items:center; gap:12px; padding:8px 8px 8px 14px; min-height:48px; border-radius:14px; font-size:14px;
+.toast { pointer-events:none; display:flex; align-items:center; gap:12px; padding:8px 8px 8px 14px; min-height:48px; border-radius:var(--radius-s); font-size:14px;
   background:linear-gradient(180deg, #33312d, #2a2825); color:var(--fg); border:1px solid rgba(255,236,210,.1);
   box-shadow:0 14px 30px rgba(0,0,0,.55); opacity:0; transform:translateY(8px); transition:opacity .18s, transform .18s; }
 .toast.show { opacity:1; transform:none; }
 .toast .lamp { width:6px; height:6px; }
 .toast .tx { flex:1; min-width:0; padding:4px 0; }
 .toast.err { border-color:rgba(228,138,110,.35); }
-.toast button { pointer-events:auto; border:0; background:none; color:var(--amber-hi); font-weight:600; min-height:44px; padding:0 10px; font-size:14px; border-radius:10px; }
+.toast button { pointer-events:auto; border:0; background:none; color:var(--amber-hi); font-weight:600; min-height:44px; padding:0 10px; font-size:14px; border-radius:var(--radius-xs); }
 
 /* disabled overlay hint */
 body.locked .need-awake { opacity:.5; }
@@ -593,11 +609,12 @@ body.locked .need-awake { opacity:.5; }
   .top-inner { min-height:52px; padding:0 8px; }
   .brand { flex:0 0 auto; width:250px; }
   nav.tabs { position:fixed; top:12px; bottom:auto; left:50%; right:auto; transform:translateX(-50%); padding:4px; gap:2px;
-    background:var(--well); border:1px solid var(--line); border-radius:14px; box-shadow:inset 0 1px 3px rgba(0,0,0,.6); }
-  nav.tabs button { flex:none; flex-direction:row; min-height:42px; max-width:none; padding:0 16px; gap:8px; font-size:13px; border-radius:10px; }
+    background:var(--well); border:1px solid var(--line); border-radius:var(--radius-s); box-shadow:inset 0 1px 3px rgba(0,0,0,.6); }
+  nav.tabs button { flex:none; flex-direction:row; min-height:42px; max-width:none; padding:0 16px; gap:8px; font-size:13px; border-radius:var(--radius-xs); }
   nav.tabs svg { width:18px; height:18px; flex:none; }
   nav.tabs button[aria-current="page"] { background:linear-gradient(180deg, #34322e, #2a2825); box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 2px 5px rgba(0,0,0,.4); }
-  nav.tabs button[aria-current="page"]::before { top:auto; bottom:4px; width:14px; }
+  /* valgt fane på PC: hevet tast som i segmentvelgerne, uten strek */
+  nav.tabs button[aria-current="page"]::before { display:none; }
   .pwr { margin-left:auto; }
   main { padding:24px 32px 48px; }
   #toasts { left:auto; right:32px; transform:none; bottom:28px; width:400px; }
@@ -627,9 +644,9 @@ body.locked .need-awake { opacity:.5; }
   .fp-ctrl .transport .round.main { width:52px; height:52px; }
   .fp-ctrl .inputs { width:auto; flex:1 1 auto; margin:0; padding:0; border:0; display:flex; align-items:center; justify-content:flex-end; gap:14px; }
   .fp-ctrl .inputs > .engr { text-align:left; flex:none; }
-  .inputs .sel { display:flex; gap:6px; margin:0; padding:3px; border-radius:12px; background:var(--well);
+  .inputs .sel { display:flex; gap:6px; margin:0; padding:3px; border-radius:var(--radius-s); background:var(--well);
     border:1px solid var(--line); box-shadow:inset 0 1px 3px rgba(0,0,0,.6); }
-  .src { min-height:36px; padding:0 14px; gap:8px; font-size:10.5px; letter-spacing:.12em; border-radius:9px; }
+  .src { min-height:36px; padding:0 14px; gap:8px; font-size:10.5px; letter-spacing:.12em; }
 
   .deck { display:grid; grid-template-columns:auto minmax(0, 1fr); margin-top:12px; }
   .deck-sec { gap:8px 14px; padding:10px 20px 14px; align-content:start; }
@@ -721,6 +738,10 @@ body.locked .need-awake { opacity:.5; }
   .banner .acts { flex:1 1 100%; justify-content:flex-end; flex-wrap:wrap; }
   .qr-row { flex-direction:column; align-items:flex-start; }
   #saveForm .btn { flex:1 1 100%; }
+  /* nøkkel/verdi stables: etiketten over verdien, så lange verdier får hele bredden */
+  dl.kv { grid-template-columns:minmax(0, 1fr); gap:0; }
+  dl.kv dt { font-size:12.5px; margin-top:10px; }
+  dl.kv dt:first-child { margin-top:0; }
 }
 @media (max-width: 380px) {
   .fp-lamps { gap:10px; }
@@ -730,31 +751,41 @@ body.locked .need-awake { opacity:.5; }
 @media (max-width: 360px) {
   nav.tabs button { font-size:10.5px; letter-spacing:0; }
   .fp-lamps span { letter-spacing:.04em; }
+  /* Kurve: knappene får hele raden og statusen («Avvik maks …») står på en egen linje under dem, og verdiene i
+     filterlisten står på linjen under filtertypen, så kortet ikke blir bredere enn skjermen (320–360 px) */
+  #eqCurveView .eq-tools { flex-wrap:wrap; row-gap:0; }
+  #eqCurveView .eq-tools .btn { flex:none; }
+  #eqCurveView .eq-tools .saving { order:9; flex:1 1 100%; min-height:20px; padding:0 2px; }
 }
-/* ---------------- frontplate MED aluminiumslist (Mer → Utseende; html[data-front="alu"])
-   Den samme topp-raden (modellnavn + lamper) tegnes som den børstede lyse listen fra før, med SUMEL-gravering.
-   Uten liste (standard) vises raden som dempet gravering og lampebrønn. Alle ytterhjørner er rette i begge varianter. */
+/* Filterlisten i Kurve: verdien («12,5 kHz · −11,5 dB · middels») står på egen linje på smale telefoner
+   (opptil ca. 400 px), ellers blir kortet bredere enn skjermen etter en tilpasning. */
+@media (max-width: 400px) {
+  .fit-row { flex-wrap:wrap; row-gap:0; }
+  .fit-row .v { flex:1 1 100%; padding-left:36px; white-space:normal; }
+}
+/* ---------------- frontplate MED aluminiumslist (standard; Mer → Utseende; html[data-front="alu"])
+   Den samme topp-raden (modellnavn + lamper) tegnes som en børstet lys list med SUMEL-gravering, og lampene sitter i et
+   lite mørkt indikatorvindu i listen. Uten list (html[data-front="plain"]) vises raden som dempet gravering og lampebrønn.
+   Alle ytterhjørner er rette i begge varianter. */
 .fp-mark, .fp-inlay { display:none; }
 #frontSeg { max-width:100%; align-self:flex-start; }
 #frontSeg button { min-width:0; line-height:1.25; }
 html[data-front="alu"] .faceplate { padding:0; }
 html[data-front="alu"] .fp-cheek { display:none; }
 html[data-front="alu"] .fp-inner { box-shadow:none; }
-html[data-front="alu"] .fp-head { position:relative; justify-content:flex-start; gap:14px; padding:13px 18px 12px; min-height:48px;
+html[data-front="alu"] .fp-head { position:relative; justify-content:flex-start; gap:14px; padding:9px 18px; min-height:48px;
   background:var(--brush), linear-gradient(180deg, #dddcd7 0%, #c4c3be 55%, #b0afaa 100%);
   border-bottom:1px solid rgba(0,0,0,.65); box-shadow:inset 0 1px 0 rgba(255,255,255,.8), inset 0 -1px 0 rgba(255,255,255,.25); }
 html[data-front="alu"] .fp-mark { display:inline; flex:none; font-family:var(--display); font-size:13px; font-weight:500; letter-spacing:.46em; text-transform:uppercase; color:#34332f;
   text-shadow:0 1px 0 rgba(255,255,255,.65); white-space:nowrap; }
 html[data-front="alu"] .fp-model { display:inline; font-size:11px; font-weight:400; letter-spacing:.14em; text-transform:uppercase; color:#46453f; text-shadow:0 1px 0 rgba(255,255,255,.55); }
-html[data-front="alu"] .fp-lamps { margin-left:auto; gap:14px; padding:0; border-radius:0; background:none; box-shadow:none; }
-html[data-front="alu"] .fp-lamps span, html[data-front="alu"] .fp-lamps span:has(.lamp.on, .lamp.white) { gap:6px; font-size:10px; line-height:inherit; letter-spacing:.14em;
-  color:#3f3e3a; text-shadow:0 1px 0 rgba(255,255,255,.55); }
-/* lampene sitter i små mørke sokler i aluminiumen, så både hvit og amber lyser tydelig */
-html[data-front="alu"] .fp-lamps .lamp { --c:#4a4844; width:6px; height:6px; background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.35), transparent 55%), var(--c);
-  box-shadow:0 0 0 1.5px #2c2b28, 0 1px 0 1.5px rgba(255,255,255,.55); }
-html[data-front="alu"] .fp-lamps .lamp.on { --c:#ffb862; box-shadow:0 0 0 1.5px #2c2b28, 0 0 5px 2px var(--amber-glow); }
-html[data-front="alu"] .fp-lamps .lamp.white { --c:#fffef9; box-shadow:0 0 0 1.5px #2c2b28, 0 0 5px 2px rgba(255,252,240,.9); }
-html[data-front="alu"] .fp-lamps .lamp.red { --c:#d0452f; box-shadow:0 0 0 1.5px #2c2b28, 0 0 4px 1px rgba(210,85,63,.6); }
+/* indikatorvinduet: mørkt glass felt inn i aluminiumen (lys underkant). Lampene og etikettene er de samme som uten list
+   (.fp-lamps .lamp over): tent = tydelig glød og lys tekst, slukket = flat mørk prikk og dempet tekst. Vinduet er 24 px høyt,
+   så listen beholder høyden sin (48 px). */
+html[data-front="alu"] .fp-lamps { margin-left:auto; gap:14px; padding:5px 12px;
+  background:linear-gradient(180deg, #0c0b0a, #151412);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.9), inset 0 0 0 1px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.75); }
+html[data-front="alu"] .fp-lamps span { gap:6px; font-size:10px; letter-spacing:.14em; }
 /* smal valnøttinnlegg under aluminiumslisten (mobil/nettbrett, der kabinettet ikke har valnøttsider) */
 html[data-front="alu"] .fp-inlay { display:block; height:6px; background:var(--grain-h), linear-gradient(180deg, #5a3a23, #3a2416);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08), inset 0 -1px 0 rgba(0,0,0,.5); }
@@ -765,16 +796,31 @@ html[data-front="alu"] .fp-body { padding-top:22px; }
   html[data-front="alu"] .fp-inlay { display:none; }
   html[data-front="alu"] .fp-body { padding-top:18px; }
 }
-@media (max-width: 520px) {
-  html[data-front="alu"] .fp-head { padding:12px 14px; gap:10px; }
-  html[data-front="alu"] .fp-mark { letter-spacing:.36em; }
+/* Med indikatorvinduet er det ikke plass til hele modellnavnet («LEMUS HOME 1500 · PLATIN SM450») i listen under ca. 660 px.
+   Der skjules det, som på telefon, i stedet for å kuttes midt i modellnummeret. */
+@media (max-width: 660px) {
   html[data-front="alu"] .fp-model { display:none; }
+}
+/* Uten aluminiumslist: modellnavnet får plass fra ca. 540 px; under det skjules det i stedet for å kuttes. */
+@media (max-width: 540px) {
+  .fp-model { display:none; }
+}
+@media (max-width: 520px) {
+  html[data-front="alu"] .fp-head { padding:9px 14px; gap:10px; }
+  html[data-front="alu"] .fp-mark { letter-spacing:.36em; }
   html[data-front="alu"] .fp-lamps { gap:11px; }
   html[data-front="alu"] .fp-body { padding:14px 14px 16px; }
 }
 @media (max-width: 380px) {
   html[data-front="alu"] .fp-lamps { gap:10px; }
   html[data-front="alu"] .fp-lamps span { letter-spacing:.08em; }
+}
+/* 320–360 px (iPhone SE/mini med skjermzoom): vinduet må få plass innenfor listens kant ved siden av SUMEL-graveringen */
+@media (max-width: 360px) {
+  html[data-front="alu"] .fp-head { padding:9px 12px; gap:8px; }
+  html[data-front="alu"] .fp-mark { letter-spacing:.3em; }
+  html[data-front="alu"] .fp-lamps { padding:5px 8px; gap:8px; }
+  html[data-front="alu"] .fp-lamps span { gap:4px; letter-spacing:.04em; }
 }
 </style>
 </head>
@@ -1102,8 +1148,7 @@ html[data-front="alu"] .fp-body { padding-top:22px; }
         </div>
         <div class="copyline" style="margin-top:14px"><code id="lanUrl">–</code><button class="btn sm" id="copyUrl" type="button" data-i18n="more.copy">Kopier</button></div>
         <div id="codeBox" hidden style="margin-top:14px">
-          <div class="engr" style="margin-bottom:6px" data-i18n="more.code">Tilgangskode</div>
-          <div class="code" id="accessCode"></div>
+          <div class="field"><span data-i18n="more.code">Tilgangskode</span><div class="code" id="accessCode"></div></div>
           <p class="small muted" style="margin-top:8px" data-i18n="more.codeNote">Koden vises bare her på PC-en. Du trenger den én gang på hver enhet. Lenken og QR-koden logger inn automatisk.</p>
         </div>
       </div>
@@ -1165,7 +1210,7 @@ html[data-front="alu"] .fp-body { padding-top:22px; }
       </div>
     </div>
   </details>
-  <p class="small muted" id="aboutLine" style="margin:22px 4px 8px;opacity:.75"><b>SUMEL</b> 0.10.1 · <span data-i18n="about.tag">fjernkontroll for Platin SM450</span><br><i data-i18n="about.why">Utviklet grunnet irritasjon på dårlige eller ikke-eksisterende apper. =)</i></p>
+  <p class="small muted" id="aboutLine" style="margin:22px 4px 8px;opacity:.75"><b>SUMEL</b> 1.0.0 · <span data-i18n="about.tag">fjernkontroll for Platin SM450</span><br><i data-i18n="about.why">Utviklet grunnet irritasjon på dårlige eller ikke-eksisterende apper. =)</i></p>
 </section>
 </main>
 <div id="toasts" aria-live="polite"></div>
@@ -1194,12 +1239,12 @@ const I18N = {
     "play.play": "Spill", "play.pause": "Pause",
     "play.playing": "Spiller", "play.paused": "Pause", "play.stopped": "Stoppet", "play.loading": "Laster …",
     "disp.eqOff": "EQ av", "disp.profile": "Profil: {name}", "disp.custom": "Egen innstilling", "disp.writing": "Skriver «{name}» …",
-    "disp.noPoints": "Ingen EQ-punkter", "disp.aria": "Åpne EQ. {info}",
+    "disp.noPoints": "Ingen EQ-punkter", "disp.notRead": "EQ ikke lest ennå", "disp.aria": "Åpne EQ. {info}",
     "vol.unknown": "ukjent", "vol.sendingSuffix": ", sender", "vol.reading": "Leser volum …", "vol.unavailable": "Volum utilgjengelig",
     "vol.sendingCur": "Sender … · høyttaleren {cur}", "vol.sending": "Sender …", "vol.rejected": "Avvist – viser høyttalerens verdi",
-    "vol.confirmed": "Bekreftet", "vol.live": "Volum {v}", "vol.notChanged": "Volumet ble ikke endret. ", "vol.showing": "Viser høyttalerens verdi.",
+    "vol.live": "Volum {v}", "vol.notChanged": "Volumet ble ikke endret. ", "vol.showing": "Viser høyttalerens verdi.",
     "vol.stopped": "Stoppet ved {n} for sikkerhet", "mute.muted": "Dempet", "mute.live": "Lyden er dempet", "mute.unmuted": "Lyden er på igjen",
-    "mute.busy": "Demper …", "mute.unbusy": "Slår på lyden …", "mute.hint": "Trykk på hjulet for å dempe",
+    "mute.busy": "Demper …", "mute.unbusy": "Slår på lyden …", "mute.hint": "Trykk på hjulet for å dempe", "mute.hintMouse": "Klikk midt på hjulet for å dempe",
     "toast.powerOn": "Høyttaleren er på", "toast.powerOff": "Høyttaleren står i standby",
     "src.none": "Ingen innganger lest ennå",
     "sw.on": "På", "sw.off": "Av", "sw.toast": v => `${v.label} ${v.on ? "på" : "av"}`,
@@ -1209,12 +1254,13 @@ const I18N = {
     "toast.undone": "Angret", "toast.maxBands": "SM450 tar høyst {n} EQ-punkter. Slett ett først.", "toast.pointAdded": "Punkt lagt til",
     "toast.pointDeleted": "Punkt {n} slettet", "toast.bandsRead": "Båndene er lest på nytt",
     "eq.eqOffTag": "Egen EQ er av", "room.legendOff": "Egen EQ er av – kurven er flat",
-    "room.notRead": "Målingen er ikke lest fra høyttaleren ennå.", "room.noMeasurement": "Ingen måling funnet i høyttaleren. Romkorreksjonen måles i Platin-appen (Room EQ).", "room.unknownFormat": "Høyttaleren svarte, men målingen har et ukjent format ({n} byte).", "room.tagOn": "Korreksjon på", "room.tagOff": "Korreksjon av",
+    "room.notRead": "Målingen er ikke lest fra høyttaleren ennå.", "room.noMeasurement": "Ingen måling funnet i høyttaleren. Romkorreksjonen måles i Platin-appen (Room EQ).", "room.unknownFormat": "Høyttaleren svarte, men målingen har et ukjent format ({n} byte).", "room.tagOn": "Korreksjon på", "room.tagOff": "Korreksjon av", "room.tagNone": "Ingen måling",
     "room.limitLbl": "≈ 550 Hz",
     "bl.empty": "Ingen EQ-punkter. Legg til med «Punkt» eller dobbeltklikk i grafen (høyst {max}).",
-    "bl.aria": "Punkt {n}: {desc}", "bl.ro": ", kan ikke endres ennå", "bl.count": "{n} av {max}",
+    "bl.aria": "Punkt {n}: {desc}", "bl.ro": ", kan ikke endres ennå", "bl.outside": ", låst: ligger utenfor de tre plassene SUMEL kan bruke", "bl.count": "{n} av {max}",
     "insp.notWritable": " – ikke skrivbar ennå", "insp.head": "Punkt {n} · {type}", "insp.saving": "Lagrer …",
-    "insp.locked": "Sperret plass – slett punktet", "insp.slot": "Plass {n} av {max}", "insp.offSuffix": " · av",
+    "insp.locked": "Plass {n} · utenfor SUMELs tre plasser", "insp.slot": "Plass {n} av {max}", "insp.offSuffix": " · av",
+    "insp.outside": "Dette filteret ligger utenfor de tre plassene SUMEL kan bruke, og blir ikke rørt. Kom det dit ved en feil, kan du slå høyttaleren helt av (strømbryter eller stikkontakt) i 10 sekunder. Da lastes trolig fabrikkoppsettet inn igjen.",
     "insp.isOn": "Punktet er på", "insp.isOff": "Punktet er av", "insp.offHint": "Slå av for å høre uten dette punktet",
     "insp.noDisable": "Av/på per punkt er ikke tilgjengelig ennå. Det læres når du slår et punkt av i Platin-appen mens SUMEL kjører.",
     "insp.typeWarn": "«{type}» kan ikke skrives fra SUMEL ennå. Punktet vises slik det er i høyttaleren. Lagre et filter av denne typen i Platin-appen mens SUMEL kjører, så lærer appen formatet og typen blir skrivbar.",
@@ -1223,6 +1269,9 @@ const I18N = {
     "eq.modeHintPoints": "Still de tre filtrene i høyttaleren direkte.",
     "eq.modeHintCurve": "Tegn kurven du vil ha med ti punkter. Appen finner de tre filtrene som passer best.",
     "curve.maxErr": "avvik maks", "curve.flat": "Flat kurve – ingen filtre trengs.", "curve.untouched": "Dra et punkt for å beregne filtrene.",
+    "curve.noFilters": "Ingen filtre trengs for denne kurven.",
+    "curve.noRoom": "Ingen ledige plasser: alle tre EQ-plassene har filtre SUMEL ikke kan endre.",
+    "curve.noRoomKept": v => `Ingen ledige plasser: alle tre EQ-plassene har filtre som kurven beholder (${v.list}). Slett ett i Punkter for å bruke kurven.`,
     "curve.calc": "Beregner …", "curve.errShort": v => `Avvik maks ${v.e}\u00a0dB`, "curve.failed": "Fikk ikke beregnet filtrene.",
     "curve.locked": v => `${v.n === 1 ? "Én plass" : v.n + " plasser"} er tatt av ${v.n === 1 ? "et filter" : "filtre"} som beholdes (${v.list}), så kurven bruker høyst ${v.max}.`,
     "eq.leadCurve": "Kurve-EQ i SM450. Ingenting skrives til høyttaleren før du trykker «Bruk».",
@@ -1233,11 +1282,14 @@ const I18N = {
     "curve.widthTitle": "Bredde (Q {q})", "curve.untouchedApply": "Endre kurven først.",
     "curve.confirm": v => `Dette erstatter ${v.n === 1 ? "punktet" : `de ${v.n} punktene`} i høyttaleren med ${v.m ? (v.m === 1 ? "ett filter" : v.m + " filtre") + " fra kurven" : "flat EQ (ingen filtre)"}. Du kan angre etterpå.`,
     "curve.applying": "Skriver …", "curve.applied": v => v.n ? `Kurven er skrevet til høyttaleren (${v.n === 1 ? "ett filter" : v.n + " filtre"})` : "EQ-en er flat nå",
+    "curve.appliedNone": "Kurven er brukt – den trenger ingen filtre",
     "curve.saved": "«{name}» er lagret med kurven", "curve.pointAria": "{hz}: {db} dB", "curve.needName": "Gi profilen et navn.",
     "curve.handle": "{hz} {db} dB",
     "tone.full": "Alle {n} EQ-plassene i SM450 er tatt av filtre som tonekontrollene ikke kan endre. Fjern ett i EQ-fanen for å bruke {name}knappen.", "tone.openEq": "Åpne EQ",
+    "tone.fullLocked": "Alle {n} EQ-plassene i SM450 er tatt av filtre SUMEL ikke kan endre eller fjerne, så {name}knappen har ingen ledig plass. Filtrene kan endres i Platin-appen.",
     "tone.took": v => `Tonekontrollene tok over EQ-en (${v.n === 1 ? "ett filter" : v.n + " filtre"}).${v.off ? " EQ-en er av nå, så du hører det først når den slås på." : ""}`,
     "tone.fullSome": v => `${v.l === 1 ? "Én EQ-plass i SM450 er tatt av et filter" : "To EQ-plasser i SM450 er tatt av filtre"} tonekontrollene ikke kan endre, så bare ${v.k === 1 ? "ett tonehjul" : "to tonehjul"} kan brukes om gangen. Fjern filteret i EQ-fanen for å bruke ${v.name}knappen.`, "tone.takeTip": "Dra for å bruke tonekontrollene – de tar over EQ-en.",
+    "tone.fullSomeLocked": v => `${v.l === 1 ? "Én EQ-plass i SM450 er tatt av et filter" : "To EQ-plasser i SM450 er tatt av filtre"} SUMEL ikke kan endre eller fjerne, så bare ${v.k === 1 ? "ett tonehjul" : "to tonehjul"} kan brukes om gangen. Slett punktet til et annet tonehjul i EQ-fanen for å bruke ${v.name}knappen.`,
     "eq.shared": "Tonehjulene på forsterkeren bruker de samme tre filtrene.",
     "toast.profileActive": "«{name}» er aktiv i høyttaleren", "q": "«{s}»",
     "toast.eqAutoOn": "Egen EQ er slått på", "toast.profileEqOn": "«{name}» er aktiv · Egen EQ er slått på",
@@ -1256,6 +1308,7 @@ const I18N = {
     "toast.duplicated": "Profilen er duplisert", "toast.deleted": "«{name}» er slettet",
     "act.label": "Aktivt i høyttaleren:", "act.matches": "samsvarer med {names}.", "act.custom": "egen innstilling – samsvarer ikke med en lagret profil.",
     "act.writable": "{n} skrivbare punkt", "act.ro": ", {n} punkt av typer appen ikke kan skrive ennå (røres ikke av profiler)",
+    "act.outside": ", {n} punkt utenfor de tre plassene SUMEL kan bruke (røres ikke)", "act.notRead": "EQ-en er ikke lest ennå.",
     "act.room": v => `romkorreksjon ${v.on ? "på" : "av"}`, "act.eq": v => `egen EQ ${v.on ? "på" : "av"}`,
     "toast.nameProfile": "Gi profilen et navn.", "toast.savedProfile": "«{name}» er lagret i appen",
     "ab.writing": "Skriver {w} … tar noen sekunder", "ab.same": "A og B er like", "ab.aActive": "A er aktiv", "ab.bActive": "B er aktiv",
@@ -1270,6 +1323,7 @@ const I18N = {
     "feat.manual_eq": "Egen EQ", "feat.room_correction": "Romkorreksjon", "feat.volume": "Volum", "feat.transport": "Avspilling",
     "feat.eq_bands": "EQ-punkter", "feat.power": "Strøm", "feat.source": "Inngang",
     "info.name": "Navn", "info.amp": "Forsterker", "info.address": "Adresse", "info.firmware": "Fastvare", "info.verified": "Testet på Lemus HOME 1500", "eq.notRead": "EQ-en i høyttaleren er ikke lest ennå (den våkner kanskje fra standby). Prøv igjen om noen sekunder.", "prof.confirmReplace": v => `«${v.name}» erstatter ${v.n === 1 ? "filteret" : `de ${v.n} filtrene`} som ligger i høyttaleren nå. Du kan angre etterpå.`,
+    "prof.noRoom": v => `Profilen «${v.name}» har ${v.n === 1 ? "ett filter" : v.n + " filtre"}, men ${v.m === 0 ? "ingen plasser er ledige" : v.m === 1 ? "bare én plass er ledig" : "bare " + v.m + " plasser er ledige"} fordi ${v.list} beholdes.`,
     "host.auto": "Finner høyttaleren automatisk{now}.", "host.autoNow": " (nå {host})", "host.fixed": "Fast adresse {host}.",
     "types.level": "nivå", "types.freqOnly": "bare frekvens", "types.learned": "Skrivbar · lært", "types.writable": "Skrivbar", "types.learnedTip": "Formelen er lært fra Platin-appen og kontrollert mot høyttaleren (bit for bit).", "types.notYet": "Ikke ennå",
     "types.onOff": "Av/på per punkt", "types.builtin": "innebygd (08 06)",
@@ -1313,6 +1367,9 @@ const I18N = {
     "curve.saveTitle": "Save as profile", "curve.namePh": "Name, e.g. “Evening curve”", "curve.nameAria": "Profile name",
     "curve.saveNote": "The profile remembers both the curve and the three filters. If you use the profile later, the curve is filled in here again.",
     "curve.maxErr": "max deviation", "curve.flat": "Flat curve – no filters needed.", "curve.untouched": "Drag a point to calculate the filters.",
+    "curve.noFilters": "No filters needed for this curve.",
+    "curve.noRoom": "No free slots: all three EQ slots hold filters SUMEL can’t change.",
+    "curve.noRoomKept": v => `No free slots: all three EQ slots hold filters the curve keeps (${v.list}). Delete one in Points to use the curve.`,
     "curve.calc": "Calculating …", "curve.errShort": v => `Deviation max ${v.e}\u00a0dB`, "curve.failed": "Couldn’t calculate the filters.",
     "curve.locked": v => `${v.n === 1 ? "One slot is" : v.n + " slots are"} taken by ${v.n === 1 ? "a filter" : "filters"} that stay${v.n === 1 ? "s" : ""} (${v.list}), so the curve uses at most ${v.max}.`,
     "eq.leadCurve": "Curve EQ in the SM450. Nothing is written to the speaker until you press “Apply”.",
@@ -1324,6 +1381,7 @@ const I18N = {
     "curve.widthTitle": "Width (Q {q})", "curve.untouchedApply": "Change the curve first.",
     "curve.confirm": v => `This replaces the ${v.n} point${v.n === 1 ? "" : "s"} in the speaker with ${v.m ? v.m + " filter" + (v.m === 1 ? "" : "s") + " from the curve" : "a flat EQ (no filters)"}. You can undo afterwards.`,
     "curve.applying": "Writing …", "curve.applied": v => v.n ? `The curve is written to the speaker (${v.n} filter${v.n === 1 ? "" : "s"})` : "The EQ is flat now",
+    "curve.appliedNone": "The curve is applied – it needs no filters",
     "curve.saved": "“{name}” saved with the curve", "curve.pointAria": "{hz}: {db} dB", "curve.needName": "Give the profile a name.",
     "curve.handle": "{hz} {db} dB",
     "eq.lead": "Parametric EQ in the SM450. Every change is written to the speaker and confirmed before it shows as saved.",
@@ -1399,12 +1457,12 @@ const I18N = {
     "play.play": "Play", "play.pause": "Pause",
     "play.playing": "Playing", "play.paused": "Paused", "play.stopped": "Stopped", "play.loading": "Loading …",
     "disp.eqOff": "EQ off", "disp.profile": "Profile: {name}", "disp.custom": "Custom setting", "disp.writing": "Writing “{name}” …",
-    "disp.noPoints": "No EQ points", "disp.aria": "Open EQ. {info}",
+    "disp.noPoints": "No EQ points", "disp.notRead": "EQ not read yet", "disp.aria": "Open EQ. {info}",
     "vol.unknown": "unknown", "vol.sendingSuffix": ", sending", "vol.reading": "Reading volume …", "vol.unavailable": "Volume unavailable",
     "vol.sendingCur": "Sending … · speaker {cur}", "vol.sending": "Sending …", "vol.rejected": "Rejected – showing the speaker’s value",
-    "vol.confirmed": "Confirmed", "vol.live": "Volume {v}", "vol.notChanged": "The volume wasn’t changed. ", "vol.showing": "Showing the speaker’s value.",
+    "vol.live": "Volume {v}", "vol.notChanged": "The volume wasn’t changed. ", "vol.showing": "Showing the speaker’s value.",
     "vol.stopped": "Stopped at {n} for safety", "mute.muted": "Muted", "mute.live": "The sound is muted", "mute.unmuted": "The sound is back on",
-    "mute.busy": "Muting …", "mute.unbusy": "Unmuting …", "mute.hint": "Tap the knob to mute",
+    "mute.busy": "Muting …", "mute.unbusy": "Unmuting …", "mute.hint": "Tap the knob to mute", "mute.hintMouse": "Click the centre of the knob to mute",
     "toast.powerOn": "The speaker is on", "toast.powerOff": "The speaker is in standby",
     "src.none": "No inputs read yet",
     "sw.on": "On", "sw.off": "Off", "sw.toast": v => `${v.label} ${v.on ? "on" : "off"}`,
@@ -1414,20 +1472,23 @@ const I18N = {
     "toast.undone": "Undone", "toast.maxBands": "The SM450 takes at most {n} EQ points. Delete one first.", "toast.pointAdded": "Point added",
     "toast.pointDeleted": "Point {n} deleted", "toast.bandsRead": "Bands reloaded",
     "eq.eqOffTag": "Custom EQ is off", "room.legendOff": "Custom EQ is off – the curve is flat",
-    "room.notRead": "The measurement hasn’t been read from the speaker yet.", "room.noMeasurement": "No measurement found in the speaker. Room correction is measured in the Platin app (Room EQ).", "room.unknownFormat": "The speaker answered, but the measurement has an unknown format ({n} bytes).", "room.tagOn": "Correction on", "room.tagOff": "Correction off",
+    "room.notRead": "The measurement hasn’t been read from the speaker yet.", "room.noMeasurement": "No measurement found in the speaker. Room correction is measured in the Platin app (Room EQ).", "room.unknownFormat": "The speaker answered, but the measurement has an unknown format ({n} bytes).", "room.tagOn": "Correction on", "room.tagOff": "Correction off", "room.tagNone": "No measurement",
     "room.limitLbl": "≈ 550 Hz",
     "bl.empty": "No EQ points. Add one with “Point” or double-click in the graph (max {max}).",
-    "bl.aria": "Point {n}: {desc}", "bl.ro": ", can’t be changed yet", "bl.count": "{n} of {max}",
+    "bl.aria": "Point {n}: {desc}", "bl.ro": ", can’t be changed yet", "bl.outside": ", locked: outside the three slots SUMEL can use", "bl.count": "{n} of {max}",
     "insp.notWritable": " – not writable yet", "insp.head": "Point {n} · {type}", "insp.saving": "Saving …",
-    "insp.locked": "Locked slot – delete the point", "insp.slot": "Slot {n} of {max}", "insp.offSuffix": " · off",
+    "insp.locked": "Slot {n} · outside SUMEL’s three slots", "insp.slot": "Slot {n} of {max}", "insp.offSuffix": " · off",
+    "insp.outside": "This filter is outside the three slots SUMEL can use, and is left alone. If it got there by mistake, switch the speaker fully off (power switch or wall socket) for 10 seconds. That will probably load the factory setup again.",
     "insp.isOn": "The point is on", "insp.isOff": "The point is off", "insp.offHint": "Switch off to hear without this point",
     "insp.noDisable": "On/off per point isn’t available yet. It’s learned when you switch a point off in the Platin app while SUMEL is running.",
     "insp.typeWarn": "“{type}” can’t be written from SUMEL yet. The point is shown as it is in the speaker. Save a filter of this type in the Platin app while SUMEL is running, and the app learns the format and the type becomes writable.",
     "toast.badNumber": "Invalid number.", "toast.limited": "Limited to {v} (the SM450 limit)",
     "tone.bass": "Bass", "tone.mid": "Mid", "tone.treble": "Treble",
     "tone.full": "All {n} EQ slots in the SM450 are taken by filters the tone knobs can’t change. Remove one in the EQ tab to use the {name} knob.", "tone.openEq": "Open EQ",
+    "tone.fullLocked": "All {n} EQ slots in the SM450 are taken by filters SUMEL can’t change or remove, so the {name} knob has no free slot. The filters can be changed in the Platin app.",
     "tone.took": v => `The tone knobs took over the EQ (${v.n} filter${v.n === 1 ? "" : "s"}).${v.off ? " The EQ is off right now, so you’ll hear it once it’s turned on." : ""}`,
     "tone.fullSome": v => `${v.l === 1 ? "One EQ slot in the SM450 is taken by a filter" : "Two EQ slots in the SM450 are taken by filters"} the tone knobs can’t change, so only ${v.k === 1 ? "one tone knob" : "two tone knobs"} can be used at a time. Remove the filter in the EQ tab to use the ${v.name} knob.`, "tone.takeTip": "Drag to use the tone knobs – they take over the EQ.",
+    "tone.fullSomeLocked": v => `${v.l === 1 ? "One EQ slot in the SM450 is taken by a filter" : "Two EQ slots in the SM450 are taken by filters"} SUMEL can’t change or remove, so only ${v.k === 1 ? "one tone knob" : "two tone knobs"} can be used at a time. Delete another tone knob’s point in the EQ tab to use the ${v.name} knob.`,
     "eq.shared": "The tone knobs on the amplifier use the same three filters.",
     "toast.profileActive": "“{name}” is active in the speaker", "q": "“{s}”",
     "toast.eqAutoOn": "Custom EQ is switched on", "toast.profileEqOn": "“{name}” is active · Custom EQ switched on",
@@ -1446,6 +1507,7 @@ const I18N = {
     "toast.duplicated": "Profile duplicated", "toast.deleted": "“{name}” deleted",
     "act.label": "Active in the speaker:", "act.matches": "matches {names}.", "act.custom": "custom setting – doesn’t match a saved profile.",
     "act.writable": v => `${v.n} writable point${v.n === 1 ? "" : "s"}`, "act.ro": v => `, ${v.n} point${v.n === 1 ? "" : "s"} of types the app can’t write yet (left alone by profiles)`,
+    "act.outside": v => `, ${v.n} point${v.n === 1 ? "" : "s"} outside the three slots SUMEL can use (left alone)`, "act.notRead": "the EQ hasn’t been read yet.",
     "act.room": v => `room correction\u00a0${v.on ? "on" : "off"}`, "act.eq": v => `custom EQ\u00a0${v.on ? "on" : "off"}`,
     "toast.nameProfile": "Give the profile a name.", "toast.savedProfile": "“{name}” saved in the app",
     "ab.writing": "Writing {w} … takes a few seconds", "ab.same": "A and B are the same", "ab.aActive": "A is active", "ab.bActive": "B is active",
@@ -1460,6 +1522,7 @@ const I18N = {
     "feat.manual_eq": "Custom EQ", "feat.room_correction": "Room correction", "feat.volume": "Volume", "feat.transport": "Playback",
     "feat.eq_bands": "EQ points", "feat.power": "Power", "feat.source": "Input",
     "info.name": "Name", "info.amp": "Amplifier", "info.address": "Address", "info.firmware": "Firmware", "info.verified": "Tested on Lemus HOME 1500", "eq.notRead": "The speaker’s EQ hasn’t been read yet (it may be waking from standby). Try again in a few seconds.", "prof.confirmReplace": v => `“${v.name}” replaces the ${v.n === 1 ? "filter" : `${v.n} filters`} in the speaker now. You can undo afterwards.`,
+    "prof.noRoom": v => `The profile “${v.name}” has ${v.n} filter${v.n === 1 ? "" : "s"}, but ${v.m === 0 ? "no slots are free" : v.m === 1 ? "only one slot is free" : "only " + v.m + " slots are free"} because ${v.list} ${v.k === 1 ? "is" : "are"} kept.`,
     "host.auto": "Finds the speaker automatically{now}.", "host.autoNow": " (now {host})", "host.fixed": "Fixed address {host}.",
     "types.level": "level", "types.freqOnly": "frequency only", "types.learned": "Writable · learned", "types.writable": "Writable", "types.learnedTip": "The formula was learned from the Platin app and checked against the speaker (bit for bit).", "types.notYet": "Not yet",
     "types.onOff": "On/off per point", "types.builtin": "built in (08 06)",
@@ -1562,6 +1625,14 @@ const ERR_EN = [
   [/^profilen bruker «(.+)», som ikke kan skrives ennå$/, m => `the profile uses “${typeNameFromNo(m[1])}”, which can’t be written yet`],
   [/^profilen har (\d+) bånd, men SM450 tar høyst (\d+)$/, m => `the profile has ${m[1]} bands, but the SM450 takes at most ${m[2]}`],
   [/^profilen og båndene som ikke kan skrives blir til sammen mer enn (\d+) bånd$/, m => `the profile plus the bands that can’t be written add up to more than ${m[1]} bands`],
+  [/^profilen og filtrene som beholdes blir til sammen mer enn (\d+) bånd\.?$/, m => `the profile plus the filters that are kept add up to more than ${m[1]} bands`],
+  [/^EQ-en i høyttaleren er ikke lest ennå \(står den i standby\?\)\. Prøv igjen om litt\.?$/, () => "The speaker’s EQ hasn’t been read yet (is it in standby?). Try again in a moment."],
+  [/^bånd (\d+) ligger utenfor de tre plassene SUMEL kan bruke, og blir ikke rørt\.?$/, m => `band ${m[1]} is outside the three slots SUMEL can use, and is left alone`],
+  [/^bånd (\d+) kan ikke endres i SUMEL\.?$/, m => `band ${m[1]} can’t be changed in SUMEL`],
+  [/^hvert bånd må være et objekt$/, () => "each band must be an object"],
+  [/^ix må være et heltall$/, () => "ix must be an integer"],
+  [/^text mangler$/, () => "text missing"],
+  [/^teksten er for lang for en QR-kode \(høyst (\d+) byte\)$/, m => `the text is too long for a QR code (at most ${m[1]} bytes)`],
   [/^ikke tilkoblet høyttaleren( \(port \d+\))?$/, m => `not connected to the speaker${m[1] || ""}`],
   [/^ukjent kilde (.+)$/, m => `unknown input ${m[1]}`],
   [/^fikk ikke lest strømstatus$/, () => "couldn’t read the power status"],
@@ -1608,7 +1679,7 @@ const ERR_EN = [
   [/^kunne ikke dempe lyden \((.*)\)$/, m => `couldn’t mute the sound (${trServer(m[1])})`],
   [/^kunne ikke skru opp lyden igjen \((.*)\)$/, m => `couldn’t turn the sound back up (${trServer(m[1])})`],
   [/^høyttaleren bekreftet ikke at lyden ble slått på igjen$/, () => "the speaker didn’t confirm that the sound was switched back on"],
-  [/^on må være true eller false$/, () => "on must be true or false"],
+  [/^(\w+) må være true eller false$/, m => `${m[1]} must be true or false`],
   [/^'(\w+)'$/, m => `missing field “${m[1]}”`],
 ];
 function trServer(msg) {
@@ -1763,7 +1834,11 @@ const pBusy = () => powerBusy || (S && (S.power_busy === "on" || S.power_busy ==
 const awake = () => online() && S.power === true && !pBusy();
 const canVol = () => awake() && S.luci_connected && S.volume != null;
 const MAX_BANDS = 3;   // SM450: et fjerde bånd ga smell i høyttalerne 8.11.2026. Sperret også i serveren.
-const bandRoom = () => awake() && ((S && S.bands) || []).length < MAX_BANDS;
+// SUMELs tre plasser er 0–2. Et bånd på plass 4 og høyere (ix ≥ 3) ligger utenfor dem og tar ingen av dem
+// (samme regel som serveren: device.apply_bands og /api/eq_fit).
+const inSlots = b => b.ix < MAX_BANDS;
+const slotBands = () => ((S && S.bands) || []).filter(inSlots);
+const bandRoom = () => awake() && slotBands().length < MAX_BANDS;
 const NEED = { online, awake, vol: canVol, room: bandRoom };
 function applyNeeds() {
   for (const el of $$("[data-need]")) el.disabled = !NEED[el.dataset.need]();
@@ -1962,7 +2037,14 @@ const VOL_INTERVAL = 150;          // høyst hvert 150 ms (≤ 7 sendinger i sek
 const VOL_LEAD = 12;               // når knappen slippes, ligger målet høyst så mange trinn foran høyttaleren
 const VOL_TOUCH_CAP = 10;          // berøring: høyst ca. +10 per drag (ned er alltid lov)
 let volTarget = null, volBusy = false, volLast = 0, volTimer = null, volFailUntil = 0;
-let volDrag = null, volStopN = null, volStopUntil = 0, volOkAt = -1e9;
+let volDrag = null, volStopN = null, volStopUntil = 0;
+// statuslinjen under hjulet: «Sender …»/«Demper …» vises bare når høyttaleren har latt vente lenger enn dette
+const VOL_SLOW_MS = 600;
+let volSendFrom = 0, muteAt = 0, volSlowTimer = null, volFadeTimer = null;
+// hintet «Trykk på hjulet for å dempe» (med mus: «Klikk midt på hjulet …») står i den ellers tomme statuslinjen til brukeren har dempet én gang
+const MUTE_LEARNED_KEY = "lemus_mute_learned";
+let muteLearned = false;
+try { muteLearned = localStorage.getItem(MUTE_LEARNED_KEY) === "1"; } catch (e) { /* privat modus: hintet vises */ }
 const volStepCap = () => Math.max(1, Math.min(5, (S && S.settings && S.settings.max_volume_step) || 5));
 // «Stoppet ved N for sikkerhet» i 2,5 s når målet kuttes (i stedet for et stille hopp tilbake)
 function volStop(n) {
@@ -1990,8 +2072,11 @@ const volKnob = new Knob($("#volKnob"), {
   // kort trykk / klikk på hjulet: demp eller slå på lyden igjen
   onTap: () => toggleMute(),
 });
-// liten ravgul lampe midt på hjulet når lyden er dempet (roterer ikke med viseren)
-$("#volKnob .knob").insertAdjacentHTML("beforeend", '<span class="lamp on mute-lamp" aria-hidden="true"></span>');
+// gravert høyttalersymbol midt på hjulet (roterer ikke med viseren): viser at et trykk der demper.
+// Lyser ravgult, med kryss i stedet for lydbølger, når lyden er dempet.
+$("#volKnob .knob").insertAdjacentHTML("beforeend", '<svg class="mute-ico" viewBox="0 0 24 24" aria-hidden="true">'
+  + '<path class="b" d="M3.5 9.4h3.4l4.6-3.7v12.6l-4.6-3.7H3.5z"/><path class="w" d="M15 9.3a3.9 3.9 0 0 1 0 5.4M17.7 6.7a7.5 7.5 0 0 1 0 10.6"/>'
+  + '<path class="x" d="M15.3 9.7l4.6 4.6M19.9 9.7l-4.6 4.6"/></svg>');
 let volUserAt = 0, volLiveTimer = null, volErrUntil = 0;
 function setVolTarget(v) {
   if (!canVol()) return;
@@ -2004,7 +2089,7 @@ async function pumpVol() {
   if (volBusy || volTarget == null || !S) return;
   const cur = S.volume;
   if (cur == null) { volTarget = null; updateVolume(); return; }
-  if (volTarget === cur) { volTarget = null; volOkAt = performance.now(); updateVolume(); setTimeout(updateVolume, 2100); return; }
+  if (volTarget === cur) { volTarget = null; updateVolume(); return; }
   const wait = VOL_INTERVAL - (performance.now() - volLast);
   if (wait > 0) { clearTimeout(volTimer); volTimer = setTimeout(pumpVol, wait); return; }
   const diff = volTarget - cur, next = cur + Math.sign(diff) * Math.min(Math.abs(diff), volStepCap());
@@ -2028,7 +2113,8 @@ const canMute = () => awake() && !!S.luci_connected;
 async function toggleMute() {
   if (!canMute() || muteBusy) return;
   const on = S.mute !== true;
-  muteBusy = on ? "on" : "off"; updateVolume();
+  if (on && !muteLearned) { muteLearned = true; try { localStorage.setItem(MUTE_LEARNED_KEY, "1"); } catch (e) { /* */ } }
+  muteBusy = on ? "on" : "off"; muteAt = performance.now(); updateVolume();
   const r = await api("/api/mute", { on }, { key: "mute" });
   muteBusy = null; updateVolume();
   if (r) { const m = t(S && S.mute ? "mute.live" : "mute.unmuted"); $("#volLive").textContent = m; }
@@ -2036,6 +2122,13 @@ async function toggleMute() {
 function updateVolume() {
   const cv = S ? S.volume : null, shown = volTarget ?? cv, pend = volTarget != null && volTarget !== cv;
   const muted = !!(S && S.mute === true), now = performance.now();
+  // Venter høyttaleren? Ventetiden måles fra siste skru (eller fra trykket på hjulet), så det aldri står noe mens man skrur.
+  const sending = pend || volBusy;
+  if (!sending) volSendFrom = 0; else if (!volSendFrom) volSendFrom = now;
+  const waitFrom = muteBusy ? muteAt : Math.max(volUserAt, volSendFrom);
+  const slow = (sending || !!muteBusy) && now - waitFrom >= VOL_SLOW_MS;
+  clearTimeout(volSlowTimer);
+  if ((sending || muteBusy) && !slow) volSlowTimer = setTimeout(updateVolume, VOL_SLOW_MS - (now - waitFrom) + 20);
   volKnob.setEnabled(canVol());
   if (shown != null && !volKnob.drag) volKnob.show(shown);
   volKnob.setGhost(pend && cv != null ? cv : null);
@@ -2044,26 +2137,38 @@ function updateVolume() {
   const num = $("#volNum"), ns = showMute ? t("mute.muted") : shown == null ? "–" : String(shown);
   if (num.textContent !== ns) num.textContent = ns;
   num.classList.toggle("mute", showMute);
-  num.classList.toggle("pending", pend && !showMute);
+  // tallet blir ravgult bare når høyttaleren har latt vente (ikke for hvert steg mens man skrur)
+  num.classList.toggle("pending", pend && slow && !showMute);
   num.classList.toggle("dim", !canVol());
   const el = $("#volKnob");
   el.classList.toggle("muted", muted && online());
   el.setAttribute("aria-valuenow", shown ?? 0);
   el.setAttribute("aria-valuetext", (shown == null ? t("vol.unknown") : `${shown}${pend ? t("vol.sendingSuffix") : ""}`) + (muted ? ", " + t("mute.muted").toLowerCase() : ""));
-  // lampen vises bare mens noe sendes, eller ved feil; «Bekreftet» bare kort etter en endring
+  // Statuslinjen under hjulet: ingen tekst mens man skrur og ingen «Bekreftet». «Sender …»/«Demper …» bare når det har
+  // ventet over VOL_SLOW_MS; volumvakt-stopp og feil vises med en gang. I ro står hintet om demping til brukeren har dempet
+  // én gang. Teksten tones inn og ut (opacity) i stedet for å blinke.
   const lamp = $("#volStateLamp"), txt = $("#volStateText"), box = $("#volState");
-  let vt, lc = null, bc = "";
+  // med mus demper bare et klikk midt på hjulet (se Knob), så hintet sier det
+  const idle = !muteLearned && canMute() && !muted ? t(FINE_POINTER.matches ? "mute.hintMouse" : "mute.hint") : "";
+  let vt = idle, lc = null, bc = "";
   // standby / ikke tilkoblet står allerede i displayet; her vises bare det som gjelder volumet
-  if (!canVol()) vt = !online() || S.power !== true ? " " : S.volume == null ? t("vol.reading") : t("vol.unavailable");
+  if (!canVol()) vt = !online() || S.power !== true ? "" : S.volume == null ? t("vol.reading") : t("vol.unavailable");
   else if (now < volStopUntil && volStopN != null) { vt = t("vol.stopped", { n: volStopN }); lc = "lamp on"; bc = "stop"; }
-  else if (muteBusy) { vt = t(muteBusy === "on" ? "mute.busy" : "mute.unbusy"); lc = "lamp on breath"; bc = "pend"; }
-  else if (pend || volBusy) { vt = cv != null && pend ? t("vol.sendingCur", { cur: cv }) : t("vol.sending"); lc = "lamp on breath"; bc = "pend"; }
+  else if (muteBusy) { if (slow) { vt = t(muteBusy === "on" ? "mute.busy" : "mute.unbusy"); lc = "lamp on breath"; bc = "pend"; } }
+  else if (sending) { if (slow) { vt = cv != null && pend ? t("vol.sendingCur", { cur: cv }) : t("vol.sending"); lc = "lamp on breath"; bc = "pend"; } }
   else if (now < volErrUntil) { vt = t("vol.rejected"); lc = "lamp red"; bc = "err"; }
-  else if (now - volOkAt < 2000) vt = t("vol.confirmed");
-  else vt = " ";
-  if (txt.textContent !== vt) txt.textContent = vt;
-  lamp.hidden = !lc; if (lc) lamp.className = lc;
-  box.className = "vol-state" + (bc ? " " + bc : "");
+  if (vt) {
+    clearTimeout(volFadeTimer);
+    if (txt.textContent !== vt) txt.textContent = vt;
+    lamp.hidden = !lc; if (lc) lamp.className = lc;
+    box.className = "vol-state" + (bc ? " " + bc : "");
+  } else if (!box.classList.contains("hide")) {
+    // tones ut med teksten og fargen den hadde; tømmes når den er usynlig. Tidtakeren avbrytes bare av ny tekst,
+    // ikke av neste oppdatering (de kommer oftere enn 300 ms), så gammel tekst blir ikke liggende for skjermlesere.
+    box.classList.add("hide");
+    clearTimeout(volFadeTimer);
+    volFadeTimer = setTimeout(() => { if (box.classList.contains("hide")) { txt.textContent = "\u00a0"; lamp.hidden = true; } }, 300);
+  }
   // skjermleser: les opp bekreftet volum etter brukerens egne endringer (forsinket til siste verdi)
   if (!pend && !volBusy && cv != null && now - volUserAt < 4000) {
     clearTimeout(volLiveTimer);
@@ -2320,9 +2425,11 @@ document.addEventListener("keydown", ev => {
   if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === "z" && !ev.shiftKey && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) { ev.preventDefault(); undo(); }
 });
 
+// alle tre plassene er tatt: et skrivbart punkt kan slettes, men låste filtre kan ikke SUMEL fjerne
+const slotsFullMsg = () => slotBands().some(isEditable) ? t("toast.maxBands", { n: MAX_BANDS }) : t("curve.noRoom");
 async function addBand(freq, gain, q = 1.0, quiet, type = 7) {
   if (!awake()) return;
-  if (((S && S.bands) || []).length >= MAX_BANDS) { toast(t("toast.maxBands", { n: MAX_BANDS }), { err: true, key: "eq" }); return; }
+  if (slotBands().length >= MAX_BANDS) { toast(slotsFullMsg(), { err: true, key: "eq" }); return; }
   snapshot();
   const before = new Set(((S && S.bands) || []).map(b => b.ix));
   const body = { type, freq: Math.round(clamp(freq, 20, 20000)), gain: Math.round(clamp(gain, -15, 15) * 2) / 2 };
@@ -2332,7 +2439,7 @@ async function addBand(freq, gain, q = 1.0, quiet, type = 7) {
   return r;
 }
 async function deleteBand(ix) {
-  if (!awake()) return;
+  if (!awake() || ix >= MAX_BANDS || !isEditable(((S && S.bands) || []).find(b => b.ix === ix))) return;
   snapshot();
   delete pending[ix];
   if (selected === ix) selected = null;
@@ -2415,7 +2522,9 @@ function drawGrid(g, G, w, h, o) {
   }
   g.restore();
 }
+// Alle kurvetegnerne tåler en tom punktliste: sumCurve gir [] når lerretet er smalere enn margene (ca. 30 px).
 function strokeCurve(g, pts, color, width, glow) {
+  if (!pts || !pts.length) return;
   g.save(); g.beginPath();
   pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y));
   g.strokeStyle = color; g.lineWidth = width; g.lineJoin = "round";
@@ -2423,6 +2532,7 @@ function strokeCurve(g, pts, color, width, glow) {
   g.stroke(); g.restore();
 }
 function fillCurve(g, G, pts, alpha) {
+  if (!pts || !pts.length) return;
   g.save(); g.beginPath(); g.moveTo(pts[0][0], G.y(0));
   pts.forEach(([x, y]) => g.lineTo(x, y)); g.lineTo(pts[pts.length - 1][0], G.y(0)); g.closePath();
   const gr = g.createLinearGradient(0, G.T, 0, G.T + G.ph);
@@ -2460,6 +2570,7 @@ function drawEq() {
   // enkeltkurver
   for (const b of active) {
     const pts = sumCurve(G, [biquad(b)], 3), sel = b.ix === selected;
+    if (!pts.length) continue;
     g.save(); g.beginPath(); g.moveTo(pts[0][0], G.y(0)); pts.forEach(([x, y]) => g.lineTo(x, y)); g.lineTo(pts[pts.length - 1][0], G.y(0)); g.closePath();
     g.fillStyle = sel ? "rgba(242,168,78,.06)" : "rgba(236,231,223,.04)"; g.fill(); g.restore();
     strokeCurve(g, pts, sel ? "rgba(242,168,78,.45)" : "rgba(236,231,223,.18)", sel ? 1.4 : 1, null);
@@ -2506,7 +2617,7 @@ function drawEq() {
     g.save(); g.font = "500 12px " + getComputedStyle(document.body).fontFamily;
     const tw = g.measureText(txt).width + 16, tx = clamp(x - tw / 2, G.L, G.L + G.pw - tw), ty = y < G.T + 44 ? y + 24 : y - 44;
     g.fillStyle = "rgba(30,28,26,.94)"; g.strokeStyle = "rgba(242,168,78,.35)";
-    g.beginPath(); g.roundRect ? g.roundRect(tx, ty, tw, 22, 6) : g.rect(tx, ty, tw, 22); g.fill(); g.stroke();
+    g.beginPath(); g.roundRect ? g.roundRect(tx, ty, tw, 22, 3) : g.rect(tx, ty, tw, 22); g.fill(); g.stroke();
     g.fillStyle = "#ffd29a"; g.textBaseline = "middle"; g.fillText(txt, tx + 8, ty + 11.5); g.restore();
   }
   cv.classList.toggle("dis", !awake());
@@ -2539,7 +2650,7 @@ function dispBands() {
       const plan = tonePlan(T, hold.v);
       if (plan) bands = bands.filter(toneKeeps).concat(plan.set.map((x, i) => toneSpec(x, plan.gains[i])));
     }
-    else if (hold.v !== 0 && bands.length < MAX_BANDS) bands.push(toneSpec(T, hold.v));
+    else if (hold.v !== 0 && bands.filter(inSlots).length < MAX_BANDS) bands.push(toneSpec(T, hold.v));
   }
   return bands;
 }
@@ -2570,7 +2681,7 @@ function drawDisplayEq() {
     const x = G.x(f); g.textAlign = f === FMIN ? "left" : "center";
     g.fillText(f >= 1000 ? f / 1000 + "k" : String(f), x, h - 2);
   }
-  g.textAlign = "right"; g.fillStyle = "rgba(200,192,180,.4)"; g.fillText("Hz", G.L + G.pw, h - 2);
+  g.textAlign = "right"; g.fillStyle = "rgba(200,192,180,.62)"; g.fillText("Hz", G.L + G.pw, h - 2);
   g.restore();
   g.save(); g.beginPath(); g.rect(G.L - 3, G.T - 5, G.pw + 6, G.ph + 10); g.clip();
   const pts = sumCurve(G, bands.filter(b => b.enabled !== false).map(biquad), 2);
@@ -2597,8 +2708,8 @@ function drawRoom() {
   const eq = eqOn ? bandsNow().filter(b => b.enabled !== false).map(biquad) : [];
   $("#roomEmpty").hidden = !!rc;
   for (const k of ["lg-m", "lg-r"]) $("#roomLegendBox ." + k).hidden = !rc;
-  const tag = $("#roomTag"), tt = !S ? "" : roomOn ? t("room.tagOn") : t("room.tagOff");
-  if (tag.textContent !== tt) tag.textContent = tt; tag.hidden = !tt; tag.className = "tag" + (roomOn ? " amber" : "");
+  const none = !!(S && S.room_curve_empty), tag = $("#roomTag"), tt = !S ? "" : none ? t("room.tagNone") : roomOn ? t("room.tagOn") : t("room.tagOff");
+  if (tag.textContent !== tt) tag.textContent = tt; tag.hidden = !tt; tag.className = "tag" + (roomOn && !none ? " amber" : "");
   $("#roomLegend").textContent = !eqOn ? t("room.legendOff") : "";
   // «Les målingen» til noe er lest, deretter «… på nytt»
   const rb = $("#roomRead"), rk = S && S.room_curve_raw ? "room.read" : "room.readCurve";
@@ -2760,12 +2871,12 @@ function renderBandList() {
     el.setAttribute("aria-pressed", String(b.ix === selected));
     const short = b.type_code === 7 ? "" : typeLabel(b.type_code) + " · ";
     el.innerHTML = `<span class="n">${b.ix + 1}</span>${esc(short)}${fmtHz(b.freq)}${hasGain(b.type_code) ? " · " + fmtDb(b.gain) : ""}`;
-    el.setAttribute("aria-label", t("bl.aria", { n: b.ix + 1, desc: `${typeLabel(b.type_code)}, ${fmtHz(b.freq)}${hasGain(b.type_code) ? ", " + fmtDb(b.gain) + " dB" : ""}${isEditable(b) ? "" : t("bl.ro")}` }));
+    el.setAttribute("aria-label", t("bl.aria", { n: b.ix + 1, desc: `${typeLabel(b.type_code)}, ${fmtHz(b.freq)}${hasGain(b.type_code) ? ", " + fmtDb(b.gain) + " dB" : ""}${isEditable(b) ? "" : b.ix >= MAX_BANDS ? t("bl.outside") : t("bl.ro")}` }));
     el.onclick = () => selectBand(b.ix === selected ? null : b.ix);
     box.appendChild(el);
   }
   const cnt = document.createElement("span");
-  cnt.className = "muted small"; cnt.textContent = t("bl.count", { n: list.length, max: MAX_BANDS });
+  cnt.className = "muted small"; cnt.textContent = t("bl.count", { n: list.filter(inSlots).length, max: MAX_BANDS });
   box.appendChild(cnt);
 }
 
@@ -2794,27 +2905,29 @@ function renderInspector() {
   const ed = isEditable(b), can = ed && awake(), ti = typeInfo(b.type_code);
   $("#inspNum").textContent = b.ix + 1; $("#inspNum").className = "big" + (ed ? "" : " ro");
   $("#inspTitle").textContent = t("insp.head", { n: b.ix + 1, type: typeName(b.type_code, ti.name) });
-  $("#inspSub").textContent = (pending[b.ix] || (drag && drag.ix === b.ix)) ? t("insp.saving") : `${b.ix >= MAX_BANDS ? t("insp.locked") : t("insp.slot", { n: b.ix + 1, max: MAX_BANDS })}${b.enabled === false ? t("insp.offSuffix") : ""}`;
+  $("#inspSub").textContent = (pending[b.ix] || (drag && drag.ix === b.ix)) ? t("insp.saving") : `${b.ix >= MAX_BANDS ? t("insp.locked", { n: b.ix + 1 }) : t("insp.slot", { n: b.ix + 1, max: MAX_BANDS })}${b.enabled === false ? t("insp.offSuffix") : ""}`;
   if (document.activeElement !== typeSel) typeSel.value = String(b.type_code);
   typeSel.disabled = !can;
   setField($("#fFreq"), String(Math.round(b.freq)), !can);
   $("#rowGain").hidden = !hasGain(b.type_code); setField($("#fGain"), b.gain == null ? "" : dec((+b.gain).toFixed(1)), !can);
   $("#rowQ").hidden = !hasQ(b.type_code); setField($("#fQ"), b.q == null ? "" : dec((+b.q).toFixed(2)), !can);
   $$("[data-step]").forEach(x => x.disabled = !can);
-  $("#delBtn").disabled = !awake();   // sletting er alltid lov, også for bånd som ikke kan endres (f.eks. plass 4)
+  // låste bånd (ukjent type, eller plass 4 og høyere = produsentens filtre) slettes og slås av/på aldri fra SUMEL
+  $("#delBtn").disabled = !can;
   const en = $("#rowEnabled");
   const enSig = [LANG, b.ix, b.enabled, S.can_disable_band, can].join();
   if (en.dataset.sig !== enSig) {
     en.dataset.sig = enSig;
     if (S.can_disable_band) {
       en.innerHTML = `<button class="tog" role="switch" aria-checked="${b.enabled !== false}" ${can ? "" : "disabled"}><span class="lamp ${b.enabled !== false ? "on" : ""}"></span><span class="t"><b>${esc(t(b.enabled !== false ? "insp.isOn" : "insp.isOff"))}</b><small>${esc(t("insp.offHint"))}</small></span><span class="state">${esc(t(b.enabled !== false ? "sw.on" : "sw.off"))}</span></button>`;
-      en.firstChild.onclick = async () => { snapshot(); await eqRun(() => eqApi("/api/band_enabled", { ix: b.ix, enabled: b.enabled === false })); };
+      en.firstChild.onclick = async () => { if (!isEditable(b) || b.ix >= MAX_BANDS) return; snapshot(); await eqRun(() => eqApi("/api/band_enabled", { ix: b.ix, enabled: b.enabled === false })); };
     } else en.innerHTML = `<div class="small muted">${esc(t("insp.noDisable"))}</div>`;
   }
-  const note = $("#inspNote"), nSig = [LANG, ed, b.type_code].join();
+  // plass 4 og høyere: produsentens filter, røres aldri. Plass 1–3 med ukjent type: typen kan ikke skrives ennå.
+  const outside = b.ix >= MAX_BANDS, note = $("#inspNote"), nSig = [LANG, ed, outside, b.type_code].join();
   if (note.dataset.sig !== nSig) {
     note.dataset.sig = nSig;
-    note.innerHTML = ed ? "" : `<div class="note warn">${esc(t("insp.typeWarn", { type: typeName(b.type_code, ti.name) }))}</div>`;
+    note.innerHTML = ed ? "" : `<div class="note warn">${esc(outside ? t("insp.outside") : t("insp.typeWarn", { type: typeName(b.type_code, ti.name) }))}</div>`;
   }
 }
 function commitField(what) {
@@ -2852,7 +2965,7 @@ $$("[data-step]").forEach(btn => btn.addEventListener("click", () => {
 }));
 typeSel.addEventListener("change", () => {
   const b = bandsNow().find(x => x.ix === selected); if (!b) return;
-  const t = +typeSel.value; if (!typeInfo(t).editable) { typeSel.value = b.type_code; return; }
+  const t = +typeSel.value; if (!typeInfo(t).editable || !isEditable(b)) { typeSel.value = b.type_code; return; }
   snapshot();
   queueBand(b.ix, { type_code: t, freq: b.freq, q: hasQ(t) ? (b.q ?? 0.71) : null, gain: hasGain(t) ? (b.gain ?? 0) : null });
 });
@@ -2903,10 +3016,13 @@ function nonToneBands() {
 const toneTakesOver = () => nonToneBands().length > 0;
 // hjulet T kan ikke brukes: ingen kurve/punkter å frigjøre, og plassene er tatt av låste filtre (og de andre hjulenes bånd)
 function toneBlockedMsg(T) {
-  const all = bandsNow();
+  const all = bandsNow().filter(inSlots);
   if (toneBand(T) || nonToneBands().length || all.length < MAX_BANDS) return "";
-  const l = all.filter(toneKeeps).length, name = t("tone." + T.k).toLowerCase();
-  return l >= MAX_BANDS ? t("tone.full", { n: MAX_BANDS, name }) : t("tone.fullSome", { l, k: MAX_BANDS - l, name });
+  const keep = all.filter(toneKeeps), l = keep.length, name = t("tone." + T.k).toLowerCase();
+  // et skrivbart filter (f.eks. et høypass) kan slettes i EQ-fanen; låste filtre kan ikke SUMEL fjerne
+  const del = keep.some(isEditable);
+  return l >= MAX_BANDS ? t(del ? "tone.full" : "tone.fullLocked", { n: MAX_BANDS, name })
+    : t(del ? "tone.fullSome" : "tone.fullSomeLocked", { l, k: MAX_BANDS - l, name });
 }
 const toneSpec = (T, gain) => ({ ix: -1, type_code: T.type, freq: T.freq, q: T.q, gain, enabled: true, editable: true });
 const TFIT_HZ = Array.from({ length: 40 }, (_, i) => 30 * Math.pow(16000 / 30, i / 39));
@@ -2927,7 +3043,7 @@ function fitTones(set, target) {
 // Gjør om EQ-en til tone-oppsett med én /api/bands_apply, slik at lyden endres minst mulig, og gi hjulet T verdien v.
 // Bånd som ikke kan skrives tas ikke med (serveren rører dem ikke); andre som beholdes sendes uendret på sin plass.
 function tonePlan(T, v) {
-  const all = bandsNow(), room = MAX_BANDS - all.filter(toneKeeps).length;
+  const all = bandsNow(), room = MAX_BANDS - all.filter(b => toneKeeps(b) && inSlots(b)).length;
   if (room < 1) return null;
   const target = respAt(all.filter(b => !toneKeeps(b) && b.enabled !== false));
   // færre plasser enn tre: hjulet som ble dratt, pluss det som gir minst endring
@@ -2998,7 +3114,7 @@ async function toneCommitNow(T, v, seq) {
   } else if (v !== 0) {
     // kurve/punkter i EQ-en: frigjør plassene ved å gjøre om til tone-oppsett (én bands_apply, kan angres)
     if (nonToneBands().length) { took = await toneTakeOver(T, v, eqWasOff); changed = !!took; }
-    else if (bandsNow().length < MAX_BANDS) changed = !!(await addBand(T.freq, v, T.q, true, T.type));   // bare tonebånd: legg til det som mangler
+    else if (bandsNow().filter(inSlots).length < MAX_BANDS) changed = !!(await addBand(T.freq, v, T.q, true, T.type));   // bare tonebånd: legg til det som mangler
     else {
       // plassene er tatt av filtre som ikke kan røres: si det tydelig, og vis knappen tilbake på 0
       const msg = toneBlockedMsg(T);
@@ -3073,6 +3189,13 @@ try {
 let curveTouched = false;
 const FIT_TYPES = [7, 6, 5];
 const curveKeeps = b => !isEditable(b) || !FIT_TYPES.includes(b.type_code);   // høypass o.l. røres ikke av kurven
+// alle tre plassene er tatt av filtre kurven beholder (samme regel som /api/eq_fit): «Bruk» kan ikke gjøre noe
+const curveNoRoom = () => !!S && S.bands_known !== false && slotBands().filter(curveKeeps).length >= MAX_BANDS;
+function curveNoRoomMsg() {
+  const kept = slotBands().filter(curveKeeps);
+  if (kept.every(b => !isEditable(b))) return t("curve.noRoom");
+  return t("curve.noRoomKept", { list: keptList(kept.map(b => ({ type: b.type_code, freq: b.freq }))) });
+}
 // dagens EQ (bare filtrene kurven kan erstatte) samplet på de ti punktene, avrundet til 0,5 dB
 function gainsFromDevice() {
   const cs = ((S && S.bands) || []).filter(b => !curveKeeps(b) && b.enabled !== false).map(biquad);
@@ -3214,7 +3337,7 @@ function drawCurve() {
   CURVE_HZ.forEach((f, i) => {
     const x = G.x(f), y = G.y(curveGains[i]), act = curveDrag ? curveDrag.i === i : (i === curveSel && document.activeElement === cv);
     g.save();
-    const hr = narrow ? 11 : 9;
+    const hr = narrow ? 7.5 : 8;   // tegnet radius; treffsonen (hitHandle) er større og uavhengig av denne
     if (act) { g.beginPath(); g.arc(x, y, hr + 6, 0, Math.PI * 2); g.strokeStyle = "rgba(242,168,78,.45)"; g.lineWidth = 1.2; g.stroke(); }
     g.beginPath(); g.arc(x, y, hr, 0, Math.PI * 2);
     const gr = g.createLinearGradient(x, y - hr, x, y + hr);
@@ -3231,7 +3354,7 @@ function drawCurve() {
     g.save(); g.font = "500 12px " + fam;
     const tw = g.measureText(txt).width + 16, tx = clamp(x - tw / 2, G.L, G.L + G.pw - tw), ty = y < G.T + 44 ? y + 20 : y - 40;
     g.fillStyle = "rgba(30,28,26,.94)"; g.strokeStyle = "rgba(242,168,78,.35)";
-    g.beginPath(); g.roundRect ? g.roundRect(tx, ty, tw, 22, 6) : g.rect(tx, ty, tw, 22); g.fill(); g.stroke();
+    g.beginPath(); g.roundRect ? g.roundRect(tx, ty, tw, 22, 3) : g.rect(tx, ty, tw, 22); g.fill(); g.stroke();
     g.fillStyle = "#ffd29a"; g.textBaseline = "middle"; g.textAlign = "left"; g.fillText(txt, tx + 8, ty + 11.5); g.restore();
   }
   const ov = $("#curveOverlay"), eqOff = S && S.manual_eq === false;
@@ -3244,7 +3367,7 @@ function drawCurve() {
 let ciSig = "";
 function renderCurveInfo() {
   const cur = fitCurrent(), lit = awake();
-  const sig = JSON.stringify([LANG, cur, fit && fitFor, fitBusy, fitErrMsg, curveConfirm, curveApplying, lit, curveKey(), curveTouched, ((S && S.bands) || []).map(b => [b.ix, b.type_code, b.freq, b.editable])]);
+  const sig = JSON.stringify([LANG, cur, fit && fitFor, fitBusy, fitErrMsg, curveConfirm, curveApplying, lit, curveKey(), curveTouched, S && S.bands_known, ((S && S.bands) || []).map(b => [b.ix, b.type_code, b.freq, b.editable])]);
   if (sig === ciSig) return; ciSig = sig;
   // status ved «Bruk»
   const st = $("#curveState");
@@ -3255,22 +3378,24 @@ function renderCurveInfo() {
   else if (cur) html = esc(t("curve.errShort", { e: dec(fit.max_err.toFixed(1)) }));
   if (st.dataset.h !== html) { st.dataset.h = html; st.innerHTML = html; }
   st.className = "saving" + (fitErrMsg && !cur && !fitBusy ? " err" : "");
-  const ap = $("#curveApply");
-  ap.disabled = !lit || curveApplying || !curveTouched;
-  ap.title = !curveTouched ? t("curve.untouchedApply") : "";
+  const ap = $("#curveApply"), noRoom = curveNoRoom(), roomMsg = noRoom ? curveNoRoomMsg() : "";
+  ap.disabled = !lit || curveApplying || !curveTouched || noRoom;
+  ap.title = noRoom ? roomMsg : !curveTouched ? t("curve.untouchedApply") : "";
   const al = t(curveApplying ? "curve.applying" : "curve.apply"); if (ap.textContent !== al) ap.textContent = al;
   $("#curveReset").disabled = isFlat();
   // avvik og filtre
   const show = fit || null, big = $("#fitErr"), lbl = $("#fitErrLbl");
   if (show) { big.textContent = dec(show.max_err.toFixed(1)) + " dB"; lbl.textContent = t("curve.maxErr"); }
-  else { big.textContent = "–"; lbl.textContent = isFlat() ? t("curve.flat") : t("curve.untouched"); }
+  else { big.textContent = "–"; lbl.textContent = noRoom ? "" : isFlat() ? t("curve.flat") : t("curve.untouched"); }
   const list = $("#fitList"); list.classList.toggle("stale", !!show && !cur);
-  if (!show) list.innerHTML = "";
-  else if (!show.bands.length) list.innerHTML = `<div class="fit-row empty">${esc(t("curve.flat"))}</div>`;
+  // «Flat» bare når kurven faktisk er flat; ingen ledige plasser sies rett ut
+  if (noRoom) list.innerHTML = `<div class="note warn small">${esc(roomMsg)}</div>`;
+  else if (!show) list.innerHTML = "";
+  else if (!show.bands.length) list.innerHTML = `<div class="fit-row empty">${esc(t(isFlat() ? "curve.flat" : "curve.noFilters"))}</div>`;
   else list.innerHTML = show.bands.map((b, i) => `<div class="fit-row"><span class="n">${i + 1}</span><span class="ty">${esc(typeLabel(b.type))}</span><span class="v">${esc(fmtHz(b.freq))} · ${esc(fmtDb(b.gain))} dB${b.q != null ? ` · <span title="${esc(t("curve.widthTitle", { q: fmtQ(b.q) }))}">${esc(widthWord(b.q))}</span>` : ""}</span></div>`).join("");
-  if (show && show.max_bands != null && show.max_bands < MAX_BANDS)
+  if (show && !noRoom && show.max_bands != null && show.max_bands < MAX_BANDS)
     list.insertAdjacentHTML("beforeend", `<div class="note warn small">${esc(t("curve.locked", { n: MAX_BANDS - show.max_bands, max: show.max_bands, list: keptList(show.kept) }))}</div>`);
-  if (show && show.level_offset > 0)
+  if (show && !noRoom && show.level_offset > 0)
     list.insertAdjacentHTML("beforeend", `<div class="note small">${esc(t("curve.level", { db: dec(show.level_offset.toFixed(1)) }))}</div>`);
   if (show && show.base_unknown > 0)
     list.insertAdjacentHTML("beforeend", `<div class="note small">${esc(t("curve.unknown", { n: show.base_unknown }))}</div>`);
@@ -3290,6 +3415,7 @@ const keptList = kept => (kept || []).map(k => `${typeLabel(k.type)} ${fmtHz(k.f
 async function applyCurve(confirmed) {
   if (!awake() || curveApplying) return;
   if (S.bands_known === false) { toast(t("eq.notRead"), { err: true, key: "eq" }); return; }
+  if (curveNoRoom()) { toast(curveNoRoomMsg(), { err: true, key: "eq" }); return; }
   const f = await ensureFit();
   if (!f) { toast(fitErrMsg || t("curve.failed"), { err: true, key: "eq" }); return; }
   const editable = ((S && S.bands) || []).filter(isEditable).sort((a, b) => a.ix - b.ix);
@@ -3312,13 +3438,13 @@ async function applyCurve(confirmed) {
     else if (fitB.length) bands.push(fitB.shift());
   }
   bands.push(...fitB);
-  const nLocked = ((S && S.bands) || []).filter(b => !isEditable(b)).length;
+  const nLocked = slotBands().filter(b => !isEditable(b)).length;
   if (bands.length + nLocked > MAX_BANDS) { curveApplying = false; renderCurveInfo(); toast(t("curve.failed"), { err: true, key: "eq" }); return; }
   snapshot();
   for (const k in pending) delete pending[k];
   const r = await eqRun(() => eqApi("/api/bands_apply", { bands }, { key: "eq" }));
   curveApplying = false; renderCurveInfo();
-  if (r) toast(t("curve.applied", { n: f.bands.length }), { key: "eq", action: { label: t("common.undo"), fn: undo } });
+  if (r) toast(t(f.bands.length || isFlat() ? "curve.applied" : "curve.appliedNone", { n: f.bands.length }), { key: "eq", action: { label: t("common.undo"), fn: undo } });
 }
 $("#curveApply").onclick = () => applyCurve(false);
 $("#curveConfirmYes").onclick = () => applyCurve(true);
@@ -3329,6 +3455,8 @@ $("#curveSaveForm").onsubmit = async ev => {
   ev.preventDefault();
   const nm = $("#curveName").value.trim();
   if (!nm) { $("#curveName").focus(); toast(t("curve.needName"), { err: true, key: "profile" }); return; }
+  // uten ledige plasser blir tilpasningen tom: profilen ville fått kurven, men ingen filtre
+  if (curveNoRoom()) { toast(curveNoRoomMsg(), { err: true, key: "profile" }); return; }
   const f = await ensureFit();
   if (!f) { toast(fitErrMsg || t("curve.failed"), { err: true, key: "profile" }); return; }
   const r = await profPost("/api/profiles/save", { name: nm, bands: f.bands.map(b => ({ type: b.type, freq: b.freq, q: b.q, gain: b.gain })), curve: curvePoints() }, t("curve.saved", { name: nm }));
@@ -3403,7 +3531,7 @@ const profBands = p => (p.bands || []).map((b, i) => ({ ix: i, type_code: b.type
 const profFull = p => (p.bands || []).some(b => !FIT_TYPES.includes(b.type ?? 7));
 const profTouches = (p, b) => isEditable(b) && (profFull(p) || FIT_TYPES.includes(b.type_code));
 function bandsMatchProfile(p) {
-  if (!S || !S.bands) return false;
+  if (!S || !S.bands || S.bands_known === false) return false;   // EQ-en er ikke lest ennå: ingen profil er aktiv
   const full = profFull(p);
   const dev = S.bands.filter(b => b.editable && (full || FIT_TYPES.includes(b.type_code))), pb = p.bands || [];
   if (dev.length !== pb.length) return false;
@@ -3434,6 +3562,14 @@ async function applyProfile(id) {
   if (!awake() || profBusy) return;
   const p = PROFILES.find(x => x.id === id); if (!p) return;
   if (S.bands_known === false) { toast(t("eq.notRead"), { err: true, key: "profile" }); return; }
+  // Får profilen plass? Samme regel som serveren (device.apply_bands/_apply_keeping): bånd som ikke er skrivbare
+  // beholdes alltid, og skrivbare bånd med andre typer enn 7/6/5 (f.eks. høypass) beholdes når profilen bare har 7/6/5.
+  // Bare det som ligger på plass 1–3, tar plass.
+  const keptNow = slotBands().filter(b => !b.editable || (!profFull(p) && !FIT_TYPES.includes(b.type_code))), need = (p.bands || []).length;
+  if (keptNow.length + need > MAX_BANDS) {
+    toast(t("prof.noRoom", { name: profName(p), n: need, m: Math.max(0, MAX_BANDS - keptNow.length), k: keptNow.length, list: keptList(keptNow.map(b => ({ type: b.type_code, freq: b.freq }))) }), { err: true, key: "profile", ms: 7000 });
+    return;
+  }
   // Filtre som ikke kommer fra en profil (laget i Punkter, Kurve eller av produsenten): spør før de erstattes
   const replaced = (S.bands || []).filter(b => profTouches(p, b));
   if (replaced.length && !PROFILES.some(bandsMatchProfile)) {
@@ -3575,7 +3711,8 @@ function profItem(p, act, lit, keep) {
 function renderProfiles(force) {
   const act = PROFILES.filter(profileMatches).map(p => p.id);
   if (moreId && !PROFILES.some(x => x.id === moreId)) moreId = null;
-  const sig = JSON.stringify([LANG, PROFILES, act, profBusy, editingId, confirmDel, confirmUpd, moreId, awake(), online(), S && S.manual_eq]);
+  const sig = JSON.stringify([LANG, PROFILES, act, profBusy, editingId, confirmDel, confirmUpd, moreId, awake(), online(), S && S.manual_eq,
+    S && S.room_correction, S && S.bands_known, S && (S.bands || []).map(b => [b.ix, !!b.editable])]);
   if (sig === profSig && !force) { renderAB(); return; } profSig = sig;
   const lit = awake();
   // hurtigvalg
@@ -3600,8 +3737,12 @@ function renderProfiles(force) {
   for (const p of mine) box.appendChild(profItem(p, act, lit, keep));
   // aktivt nå
   const names = PROFILES.filter(p => act.includes(p.id)).map(p => t("q", { s: profName(p) }));
-  const all = S && S.bands ? S.bands : [], ed = all.filter(b => b.editable).length, ro = all.length - ed;
-  $("#activeNow").innerHTML = !S ? "" : `<span class="lbl">${esc(t("act.label"))}</span>${names.length ? esc(t("act.matches", { names: names.join(", ") })) : esc(t("act.custom"))}<br><span class="muted small">${esc(t("act.writable", { n: ed }))}${ro ? esc(t("act.ro", { n: ro })) : ""} · ${esc(t("act.room", { on: S.room_correction }))} · ${esc(t("act.eq", { on: S.manual_eq }))}</span>`;
+  // låste bånd: ukjent type på plass 1–3 (ro) og produsentens filtre på plass 4 og høyere (out)
+  const all = S && S.bands ? S.bands : [], ed = all.filter(b => b.editable).length;
+  const out = all.filter(b => !b.editable && b.ix >= MAX_BANDS).length, ro = all.length - ed - out;
+  // EQ-en ikke lest ennå: ingen profil er aktiv, og antallet punkt er ukjent
+  $("#activeNow").innerHTML = !S ? "" : S.bands_known === false ? `<span class="lbl">${esc(t("act.label"))}</span>${esc(t("act.notRead"))}`
+    : `<span class="lbl">${esc(t("act.label"))}</span>${names.length ? esc(t("act.matches", { names: names.join(", ") })) : esc(t("act.custom"))}<br><span class="muted small">${esc(t("act.writable", { n: ed }))}${ro ? esc(t("act.ro", { n: ro })) : ""}${out ? esc(t("act.outside", { n: out })) : ""} · ${esc(t("act.room", { on: S.room_correction }))} · ${esc(t("act.eq", { on: S.manual_eq }))}</span>`;
   renderAB(); renderDisplay(); renderToneNote();
 }
 $("#saveForm").onsubmit = async ev => {
@@ -3674,6 +3815,7 @@ $("#restoreGo").onclick = async () => {
     body.device = Object.assign({}, restoreData.device, { bands: kept });
   }
   if (apply && !awake()) { toast(t("restore.needOn"), { err: true, key: "profile" }); return; }
+  if (apply && S.bands_known === false) { toast(t("eq.notRead"), { err: true, key: "profile" }); return; }
   setRestoreBusy(true, '<span class="lamp on breath"></span>' + esc(apply ? t("restore.busyApply") : t("restore.busy")));
   if (apply) snapshot();
   const eo = {};
@@ -3957,7 +4099,8 @@ function renderDisplay() {
     muted = S.mute === true;
     play = muted ? t("mute.muted") : PLAY_STATES.includes(S.play_state) ? t("play." + S.play_state) : "";
     const m = PROFILES.filter(profileMatches), n = (S.bands || []).length, busyP = profBusy && PROFILES.find(x => x.id === profBusy);
-    prof = busyP ? t("disp.writing", { name: profName(busyP) }) : S.manual_eq === false ? t("disp.eqOff") : m.length ? t("disp.profile", { name: profName(m[0]) }) : n ? t("disp.custom") : t("disp.noPoints");
+    prof = busyP ? t("disp.writing", { name: profName(busyP) }) : S.manual_eq === false ? t("disp.eqOff") : S.bands_known === false ? t("disp.notRead")
+      : m.length ? t("disp.profile", { name: profName(m[0]) }) : n ? t("disp.custom") : t("disp.noPoints");
   }
   if (box.classList.contains("dim") !== dim) { box.classList.toggle("dim", dim); drawAll(); }
   setText($("#dispSrc"), src); setText($("#dispPlay"), play); setText($("#dispProfile"), prof);

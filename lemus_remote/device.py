@@ -43,6 +43,10 @@ MUTE_RAMP_STEP = 5  # volum-reserve: skru opp igjen i steg på høyst så mye ..
 MUTE_RAMP_DELAY = 0.12  # ... med så mange sekunder mellom hvert steg
 FOLLOW_DELAY = 0.6  # vent litt etter en kommando fra en annen klient før vi leser på nytt
 WAKE_REFRESH_DELAYS = (2.0, 4.0, 6.0)  # etter vekking: les EQ og romkurve etter 2, 6 og 12 s (lydprosessoren trenger litt tid)
+WAKE_SOURCE_WAIT = 3.0  # etter vekking: vent så lenge på en fersk kildemelding før vi går tilbake til forrige inngang
+# Etter vekking svarer ikke lydprosessoren på båndlesing (08 04) de første sekundene (ca. 8 s ifølge databladet).
+# Så lenge, og til den har svart, betyr stillhet ikke «ingen bånd»: da beholdes det vi visste.
+WAKE_DSP_GRACE = 10.0
 # Lesekommandoer (class, opcode) – slike fra andre klienter trenger ingen oppfølging
 READ_OPS = {(0x02, 0x0D), (0x02, 0x01), (0x03, 0x05), (0x07, 0x02), (0x08, 0x05), (0x08, 0x04),
             (0x07, 0x09), (0x02, 0x89), (0x07, 0x0C)}
@@ -50,6 +54,13 @@ READ_OPS = {(0x02, 0x0D), (0x02, 0x01), (0x03, 0x05), (0x07, 0x02), (0x08, 0x05)
 
 class CommandError(Exception):
     pass
+
+
+def check_slot(ix: int) -> None:
+    """SUMEL bruker bare plass 0-2 (de tre biquadene databladet setter av til appen). Plass 3 og
+    høyere er produsentens tuning: der sendes verken skriving, av/på eller sletting."""
+    if not 0 <= ix <= MAX_BAND_INDEX:
+        raise CommandError(f"bånd {ix + 1} ligger utenfor de tre plassene SUMEL kan bruke, og blir ikke rørt")
 
 
 class Speaker:
@@ -134,6 +145,13 @@ class Speaker:
         self._ctl: asyncio.StreamWriter | None = None
         self._luci: asyncio.StreamWriter | None = None
         self._cmd_lock = asyncio.Lock()
+        # Hele EQ-operasjoner (velg plass, skriv, bekreft; profiler) går én om gangen. Tas alltid før
+        # _cmd_lock, aldri mens _cmd_lock holdes. Ikke reentrant: offentlige metoder tar låsen og
+        # kaller _-variantene, som ikke tar den.
+        self._eq_lock = asyncio.Lock()
+        self._source_seen = 0  # antall kildemeldinger (02 02), så vi kan vente på en fersk etter vekking
+        self._source_before_standby: int | None = None
+        self.wake_source_wait = WAKE_SOURCE_WAIT
         self._tasks: list[asyncio.Task] = []
         # Svar på get_filters kommer som én ramme per bånd. Vi samler en "bølge" og
         # publiserer den samlet når det har vært stille en liten stund.
@@ -142,6 +160,8 @@ class Speaker:
         self._bands_version = 0
         self._wake_task: asyncio.Task | None = None
         self.wake_refresh_delays = WAKE_REFRESH_DELAYS
+        self.wake_dsp_grace = WAKE_DSP_GRACE
+        self._dsp_wait_until = 0.0  # time.monotonic(): til da (eller til første båndsvar) er stillhet ikke «ingen bånd»
 
     # ------------------------------------------------------------ tilstand
 
@@ -163,6 +183,7 @@ class Speaker:
             return
         self.state.update(changed)
         if changed.get("power") is True and old_power is False:
+            self._dsp_wait_until = time.monotonic() + self.wake_dsp_grace
             self._schedule_wake_refresh()
         for cb in list(self._listeners):
             try:
@@ -250,6 +271,10 @@ class Speaker:
                 continue
             self._failures = 0
             self._ctl = writer
+            # Ny forbindelse (SUMEL starter, eller høyttaleren har vært av): lydprosessoren kan være like treg
+            # som etter vekking, så stillhet på båndlesing betyr ikke «ingen bånd» før den har svart eller
+            # vekkeperioden er over. _initial_queries leser båndene igjen når perioden er over.
+            self._dsp_wait_until = time.monotonic() + self.wake_dsp_grace
             await self._apply({"connected": True})
             log.info("50006: tilkoblet %s", self.host)
             if self.on_connect:
@@ -286,6 +311,8 @@ class Speaker:
                             continue
                         patch = p.decode_control(frame)
                         if patch:
+                            if "source" in patch:
+                                self._source_seen += 1
                             await self._apply(patch)
             except asyncio.TimeoutError:
                 log.info("50006: ingen svar på %.0f s, kobler til igjen", self.watchdog)
@@ -307,6 +334,13 @@ class Speaker:
                 await self._send_control(frame)
                 await asyncio.sleep(0.2)
             await self._quiet_refresh()
+            # Svarte ikke lydprosessoren (tom EQ, eller den er ikke klar ennå), leses båndene igjen når
+            # vekkeperioden er over. Da betyr stillhet «ingen bånd», og EQ-en står ikke som «ikke lest».
+            wait = self._dsp_wait_until - time.monotonic()
+            if wait > 0:
+                await asyncio.sleep(wait + 0.1)
+                if self.state.get("connected"):
+                    await self._quiet_refresh()
         except (CommandError, OSError):
             pass  # forbindelsen falt underveis. Neste tilkobling spør på nytt.
 
@@ -323,6 +357,7 @@ class Speaker:
     async def _commit_burst_later(self, delay: float = 0.8) -> None:
         await asyncio.sleep(delay)
         burst, self._burst = self._burst or {}, None
+        self._dsp_wait_until = 0.0  # lydprosessoren har svart: fra nå betyr stillhet at det ikke er noen bånd
         await self._publish_bands(burst)
 
     async def _publish_bands(self, raw_bands: dict[int, bytes]) -> None:
@@ -337,12 +372,14 @@ class Speaker:
 
     async def refresh_bands(self, timeout: float = 2.5) -> None:
         """Les alle bånd på nytt. En tom liste gir ikke noe svar, så stillhet betyr ingen bånd,
-        men bare når høyttaleren er på: i standby svarer ikke lydprosessoren, og da beholdes
-        det vi visste (eller båndene står som ukjente, ``bands_known`` False)."""
+        men bare når høyttaleren er på og lydprosessoren er klar: i standby, og rett etter vekking eller
+        en ny tilkobling til den har svart (høyst ``wake_dsp_grace`` s), beholdes det vi visste (eller båndene står
+        som ukjente, ``bands_known`` False). Ellers kunne et filter vi ikke har sett, bli overskrevet."""
         before = self._bands_version
         await self._send_control(p.get_filters(0))
         if not await self._wait_for(lambda s: self._bands_version != before, timeout):
-            if self._burst is None and self.state.get("power") is True:
+            if (self._burst is None and self.state.get("power") is True
+                    and time.monotonic() >= self._dsp_wait_until):
                 await self._publish_bands({})
 
     def _schedule_wake_refresh(self) -> None:
@@ -384,6 +421,16 @@ class Speaker:
 
     def _band(self, ix: int) -> dict | None:
         return next((b for b in self.state["bands"] if b["ix"] == ix), None)
+
+    def _editable_band(self, ix: int) -> dict:
+        """Båndet på plass ``ix``, men bare om SUMEL kan skrive det. Et låst eller ukjent filter
+        (for eksempel 6 dB høypass) blir verken endret, slått av eller slettet."""
+        band = self._band(ix)
+        if band is None:
+            raise CommandError(f"bånd {ix + 1} finnes ikke")
+        if band.get("editable") is not True:
+            raise CommandError(f"bånd {ix + 1} kan ikke endres i SUMEL")
+        return band
 
     # ------------------------------------------------------------ filtertyper og læring
 
@@ -459,9 +506,18 @@ class Speaker:
 
     async def write_band(self, ix: int | None, type_code: int, freq: int, q: float | None,
                          gain: float | None, enabled: bool = True) -> int:
-        """Endre bånd ``ix``, eller lag et nytt når ``ix`` er None. Bekreftes ved tilbakelesing."""
+        """Endre bånd ``ix``, eller lag et nytt når ``ix`` er None. Bekreftes ved tilbakelesing.
+
+        Hele operasjonen går under EQ-låsen, så to samtidige «nytt bånd» ikke velger samme plass."""
+        async with self._eq_lock:
+            return await self._write_band(ix, type_code, freq, q, gain, enabled)
+
+    async def _write_band(self, ix: int | None, type_code: int, freq: int, q: float | None,
+                          gain: float | None, enabled: bool = True) -> int:
         if ix is None:
             await self.refresh_bands()
+            if not self.state.get("bands_known"):  # ellers kan et bånd vi ikke har sett, bli overskrevet
+                raise CommandError("EQ-en i høyttaleren er ikke lest ennå (står den i standby?). Prøv igjen om litt.")
             used = {b["ix"] for b in self.state["bands"]}
             # plassene er faste og flyttes ikke ved sletting: bruk den laveste ledige, slik at
             # sletting + angre gir båndet tilbake på samme plass og plassene ikke «kryper» oppover
@@ -469,10 +525,10 @@ class Speaker:
             if not free:
                 raise CommandError(f"SM450 tar høyst {p.MAX_BANDS} EQ-bånd. Slett ett før du lager et nytt.")
             ix = free[0]
-        elif self._band(ix) is None:
-            raise CommandError(f"bånd {ix + 1} finnes ikke")
-        if ix > MAX_BAND_INDEX:
-            raise CommandError(f"bånd {ix + 1} kan ikke endres: SM450 tar høyst {p.MAX_BANDS} bånd. Slett det.")
+        else:
+            check_slot(ix)
+            self._editable_band(ix)  # låst eller ukjent filter: overskrives ikke
+        check_slot(ix)
         frame = self.band_frame(ix, type_code, freq, q, gain, True)
         q_n = (q or 0.71) if type_code in filters.HAS_Q else None
         g_n = (gain if gain is not None else 0.0) if type_code in filters.HAS_GAIN else None
@@ -484,7 +540,7 @@ class Speaker:
             if not ok:
                 raise CommandError("høyttaleren bekreftet ikke endringen av båndet")
         if not enabled:
-            await self.set_band_enabled(ix, False)
+            await self._set_band_enabled(ix, False)
         return ix
 
     async def set_band(self, ix: int, freq: int, q: float, gain: float) -> None:
@@ -497,9 +553,14 @@ class Speaker:
         return await self.write_band(None, type_code, freq, q, gain)
 
     async def set_band_enabled(self, ix: int, enabled: bool) -> None:
-        """Slå ett bånd av eller på uten å endre verdiene (08 06, status 01/02)."""
-        if self._band(ix) is None:
-            raise CommandError(f"bånd {ix + 1} finnes ikke")
+        """Slå ett bånd av eller på uten å endre verdiene (08 06, status 01/02). Bare plass 0-2,
+        og bare bånd SUMEL kan skrive (et låst eller ukjent filter røres ikke)."""
+        async with self._eq_lock:
+            await self._set_band_enabled(ix, enabled)
+
+    async def _set_band_enabled(self, ix: int, enabled: bool) -> None:
+        check_slot(ix)
+        self._editable_band(ix)
         async with self._cmd_lock:
             await self._send_control(p.set_band_state(ix, p.BAND_ON if enabled else p.BAND_OFF))
             await asyncio.sleep(0.5)
@@ -511,7 +572,13 @@ class Speaker:
         som er til overs og lag nye ved behov. Bånd av typer vi ikke kan skrive, røres ikke.
 
         Med ``keep_types`` (typene profilen kan bruke) beholdes skrivbare bånd av andre typer, for
-        eksempel et høypassfilter, på sin plass, og profilens bånd fyller de andre plassene."""
+        eksempel et høypassfilter, på sin plass, og profilens bånd fyller de andre plassene.
+
+        Hele profilen skrives under EQ-låsen, så to profiler (eller A/B) ikke blandes."""
+        async with self._eq_lock:
+            await self._apply_bands(target, keep_types)
+
+    async def _apply_bands(self, target: list[dict], keep_types: set[int] | frozenset[int] | None = None) -> None:
         norm = []
         for t in target:
             code = int(t.get("type", filters.PARAMETRIC))
@@ -528,25 +595,28 @@ class Speaker:
         if keep_types is not None and not any(n[0] not in keep_types for n in norm):
             await self._apply_keeping(norm, set(keep_types))
             return
-        if len(self.state["bands"]) - len([b for b in self.state["bands"] if b["editable"]]) + len(norm) > p.MAX_BANDS:
+        # bare låste bånd på plass 0-2 tar av de tre plassene: et bånd på plass 3+ ligger utenfor dem
+        locked = [b for b in self.state["bands"] if not b["editable"] and b["ix"] <= MAX_BAND_INDEX]
+        if len(locked) + len(norm) > p.MAX_BANDS:
             raise CommandError(f"profilen og båndene som ikke kan skrives blir til sammen mer enn {p.MAX_BANDS} bånd")
         existing = [b for b in self.state["bands"] if b["editable"]]
         for b, (code, freq, q, gain, en) in zip(existing, norm):
             qn = (q or 0.71) if code in filters.HAS_Q else None
             gn = (gain if gain is not None else 0.0) if code in filters.HAS_GAIN else None
             if not self._same(b, code, freq, qn, gn, en):
-                await self.write_band(b["ix"], code, freq, q, gain, en)
+                await self._write_band(b["ix"], code, freq, q, gain, en)
         for b in existing[len(norm):]:
-            await self.delete_band(b["ix"])
+            await self._delete_band(b["ix"])
         for code, freq, q, gain, en in norm[len(existing):]:
-            ix = await self.write_band(None, code, freq, q, gain)
+            ix = await self._write_band(None, code, freq, q, gain)
             if not en:
-                await self.write_band(ix, code, freq, q, gain, False)
+                await self._write_band(ix, code, freq, q, gain, False)
 
     async def _apply_keeping(self, norm: list[tuple], keep_types: set[int]) -> None:
         """Del av apply_bands: skrivbare bånd med typer utenfor ``keep_types`` blir stående."""
         bands = sorted(self.state["bands"], key=lambda b: b["ix"])
-        kept = [b for b in bands if not b["editable"] or b["type_code"] not in keep_types]
+        # det som beholdes og tar plass: bånd på plass 3+ beholdes også, men tar ingen av de tre plassene
+        kept = [b for b in bands if b["ix"] <= MAX_BAND_INDEX and (not b["editable"] or b["type_code"] not in keep_types)]
         if len(kept) + len(norm) > p.MAX_BANDS:
             raise CommandError(f"profilen og filtrene som beholdes blir til sammen mer enn {p.MAX_BANDS} bånd")
         rest = list(norm)
@@ -558,13 +628,13 @@ class Speaker:
                 qn = (q or 0.71) if code in filters.HAS_Q else None
                 gn = (gain if gain is not None else 0.0) if code in filters.HAS_GAIN else None
                 if not self._same(b, code, freq, qn, gn, en):
-                    await self.write_band(b["ix"], code, freq, q, gain, en)
+                    await self._write_band(b["ix"], code, freq, q, gain, en)
             else:
-                await self.delete_band(b["ix"])
+                await self._delete_band(b["ix"])
         for code, freq, q, gain, en in rest:
-            ix = await self.write_band(None, code, freq, q, gain)
+            ix = await self._write_band(None, code, freq, q, gain)
             if not en:
-                await self.write_band(ix, code, freq, q, gain, False)
+                await self._write_band(ix, code, freq, q, gain, False)
 
     async def read_room_curve(self) -> list[int] | None:
         """Les romkurven (07 09 -> 07 0a, 140 byte data). Se protocol.decode_room_curve."""
@@ -574,8 +644,14 @@ class Speaker:
         return self.state.get("room_curve_raw")
 
     async def delete_band(self, ix: int) -> None:
-        if self._band(ix) is None:
-            raise CommandError(f"bånd {ix} finnes ikke")
+        """Slett bånd ``ix`` (08 06, status 00). Bare plass 0-2: bånd på plass 3 og høyere røres ikke,
+        og heller ikke et låst eller ukjent filter."""
+        async with self._eq_lock:
+            await self._delete_band(ix)
+
+    async def _delete_band(self, ix: int) -> None:
+        check_slot(ix)
+        self._editable_band(ix)
         async with self._cmd_lock:
             await self._send_control(p.delete_band(ix))
             await asyncio.sleep(0.8)
@@ -757,13 +833,29 @@ class Speaker:
                 raise CommandError(f"kunne ikke vekke høyttaleren via DLNA ({exc})") from exc
             if not await self._wait_for(lambda s: s["power"] is True, 8, resend=p.GET_POWER, every=1.0):
                 raise CommandError("høyttaleren våknet ikke")
-        # Vekkingen bytter til Streaming. Gå tilbake til kilden som var i bruk før standby.
-        previous = getattr(self, "_source_before_standby", None)
-        if previous and previous != self.state["source"] and previous in {x["ix"] for x in self.state["sources"]}:
-            try:
-                await self.select_source(previous)
-            except CommandError:
-                pass
+        await self._restore_source()
+
+    async def _restore_source(self) -> None:
+        """Vekkingen bytter til Streaming. Gå tilbake til kilden som var i bruk før standby.
+
+        Høyttaleren kan melde «på» før den melder kildebyttet, eller ikke melde byttet i det hele tatt,
+        så kilden i tilstanden kan være den gamle. Vi spør derfor på nytt (02 01 gir 02 02 + 02 21) og
+        venter på en fersk kildemelding. Kommer ingen, velges forrige inngang likevel."""
+        previous = self._source_before_standby
+        if previous is None or previous not in {x["ix"] for x in self.state["sources"]}:
+            return
+        seen = self._source_seen
+        try:
+            await self._send_control(p.GET_SOURCES)
+        except CommandError:
+            return
+        fresh = await self._wait_for(lambda s: self._source_seen != seen, self.wake_source_wait, every=0.2)
+        if fresh and self.state["source"] == previous:
+            return
+        try:
+            await self.select_source(previous)
+        except CommandError:
+            pass
 
     async def set_volume(self, level: int, force: bool = False) -> None:
         frame = p.luci_set_volume(level)

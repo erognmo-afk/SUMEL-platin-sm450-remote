@@ -21,8 +21,8 @@ from urllib.parse import parse_qs, urlsplit
 from . import eqfit
 from . import qr
 from . import protocol as p
-from .config import Config
-from .device import CommandError, Speaker
+from .config import VOLUME_STEP_MAX, VOLUME_STEP_MIN, Config
+from .device import MAX_BAND_INDEX, CommandError, Speaker
 from .filters import PARAMETRIC
 from .profiles import ProfileStore, validate_bands
 from .discovery import close_server
@@ -50,6 +50,25 @@ FIND_TIMEOUT = 20.0  # «Finn automatisk» gir opp etter så mange sekunder og b
 
 # Finner: ett søk etter høyttaleren. Gir {"host", "name"} eller None.
 Finder = Callable[[], Awaitable[dict | None]]
+
+# Ugyldig input i en forespørsel gir 400 med feiltekst, aldri en lukket forbindelse.
+BAD_INPUT = (KeyError, TypeError, ValueError, AttributeError, OverflowError)
+
+
+def _slot(value) -> int:
+    """Plassnummer (ix) fra JSON: bare ekte heltall, ikke true/false, 1.0 eller "1"."""
+    if type(value) is not int:
+        raise ValueError("ix må være et heltall")
+    return value
+
+
+def _flag(data: dict, key: str, default: bool | None = None) -> bool:
+    """Av/på fra JSON: bare true eller false. "false", null, 0 og 1 gir 400 (bool("false") er True).
+    Uten ``default`` må feltet være med."""
+    value = data[key] if default is None else data.get(key, default)
+    if not isinstance(value, bool):
+        raise ValueError(f"{key} må være true eller false")
+    return value
 
 
 class WebServer:
@@ -147,7 +166,10 @@ class WebServer:
             if method == "GET" and path == "/api/events":
                 await self._events(writer)
                 return
-            status, ctype, payload, extra = await self._route(method, path, body, peer, headers, query)
+            try:
+                status, ctype, payload, extra = await self._route(method, path, body, peer, headers, query)
+            except BAD_INPUT as exc:  # sikkerhetsnett: ugyldig input gir alltid et svar
+                status, ctype, payload, extra = self._json(400, {"error": f"ugyldig forespørsel: {exc}"})
             self._write(writer, status, ctype, payload, extra)
             await writer.drain()
         except (asyncio.IncompleteReadError, asyncio.LimitOverrunError, asyncio.TimeoutError,
@@ -217,7 +239,7 @@ class WebServer:
             return self._json(405, {"error": "bruk POST"})
         try:
             data = json.loads(body or b"{}")
-        except json.JSONDecodeError:
+        except (ValueError, RecursionError):  # også ugyldig UTF-8 og svært dyp nøsting
             return self._json(400, {"error": "ugyldig JSON"})
         if not isinstance(data, dict):
             return self._json(400, {"error": "ugyldig JSON"})
@@ -237,39 +259,38 @@ class WebServer:
                     # SM450: preset 1-3 faller tilbake til Platin-appens kurve etter noen sekunder.
                     return self._json(400, {"error": "ikke støttet på SM450"})
                 case "/api/manual_eq":
-                    await s.set_manual_eq(bool(data["on"]))
+                    await s.set_manual_eq(_flag(data, "on"))
                 case "/api/room_correction":
-                    await s.set_room_correction(bool(data["on"]))
+                    await s.set_room_correction(_flag(data, "on"))
                 case "/api/source":
                     await s.select_source(int(data["ix"]))
                 case "/api/power":
-                    await s.set_power(bool(data["on"]))
+                    await s.set_power(_flag(data, "on"))
                 case "/api/mute":
-                    if not isinstance(data.get("on"), bool):
-                        raise ValueError("on må være true eller false")
-                    await s.set_mute(data["on"])
+                    await s.set_mute(_flag(data, "on"))
                 case "/api/volume":
-                    await s.set_volume(int(data["level"]), force=bool(data.get("force")))
+                    # Volumvakten gjelder alltid fra API-et: «force» fra klienten tas ikke imot.
+                    await s.set_volume(int(data["level"]), force=False)
                 case "/api/transport":
                     await s.transport(str(data["action"]))
                 case "/api/band":
-                    ix = None if data.get("ix") is None else int(data["ix"])
+                    ix = None if data.get("ix") is None else _slot(data["ix"])
                     t = int(data.get("type", PARAMETRIC))
                     if ix is not None and "type" not in data and s._band(ix):
                         t = s._band(ix)["type_code"]
                     # Q som leses tilbake likt (ellers blir skrivingen gjort, men ikke bekreftet)
                     q = None if data.get("q") is None else p.readback_safe_q(float(data["q"]))
                     g = None if data.get("gain") is None else float(data["gain"])
-                    await s.write_band(ix, t, int(data["freq"]), q, g, bool(data.get("enabled", True)))
+                    await s.write_band(ix, t, int(data["freq"]), q, g, _flag(data, "enabled", True))
                 case "/api/eq_fit":
                     # Bare beregning: finner høyst tre bånd for kurven. Skriver ingenting til høyttaleren.
                     return self._json(200, await asyncio.to_thread(self._eq_fit, data.get("points")))
                 case "/api/band_enabled":
-                    await s.set_band_enabled(int(data["ix"]), bool(data["enabled"]))
+                    await s.set_band_enabled(_slot(data["ix"]), _flag(data, "enabled"))
                 case "/api/bands_apply":
                     await s.apply_bands(validate_bands(data["bands"]))
                 case "/api/band_delete":
-                    await s.delete_band(int(data["ix"]))
+                    await s.delete_band(_slot(data["ix"]))
                 case "/api/bands_refresh":
                     await s.refresh_bands()
                 case "/api/room_curve":
@@ -278,7 +299,7 @@ class WebServer:
                     if self.config is None:
                         raise ValueError("innstillinger er ikke tilgjengelige")
                     if "max_volume_step" in data:
-                        step = max(2, min(100, int(data["max_volume_step"])))
+                        step = max(VOLUME_STEP_MIN, min(VOLUME_STEP_MAX, int(data["max_volume_step"])))
                         self.config["max_volume_step"] = step
                         s.max_volume_step = step
                     if "host" in data:
@@ -331,7 +352,7 @@ class WebServer:
                     return self._json(200, {"imported": n, "profiles": self.profiles.all()})
                 case _:
                     return self._json(404, {"error": "finnes ikke"})
-        except (KeyError, TypeError, ValueError) as exc:
+        except BAD_INPUT as exc:
             return self._json(400, {"error": f"ugyldig forespørsel: {exc}"})
         except CommandError as exc:
             return self._json(502, {"error": str(exc)})
@@ -359,14 +380,17 @@ class WebServer:
         s = self.speaker
         kept = [b for b in s.state.get("bands") or []
                 if not b.get("editable") or b.get("type_code") not in eqfit.FIT_TYPES]
-        max_bands = max(0, p.MAX_BANDS - len(kept))
+        # Bare det som ligger på plass 0-2, tar av de tre plassene. Et bånd på plass 3+ (utenfor SUMELs plasser)
+        # beholdes også og regnes med i lyden, men tar ingen plass og står ikke i «kept».
+        in_slots = [b for b in kept if isinstance(b.get("ix"), int) and b["ix"] <= MAX_BAND_INDEX]
+        max_bands = max(0, p.MAX_BANDS - len(in_slots))
+        # alle som beholdes, regnes med i kurven der formelen er kjent (eqfit teller resten i base_unknown)
         base = [{"type": b.get("type_code"), "freq": b.get("freq"), "q": b.get("q"), "gain": b.get("gain"),
-                 "enabled": b.get("enabled")} for b in kept if b.get("editable")]
+                 "enabled": b.get("enabled")} for b in kept]
         res = eqfit.fit(points, types=list(s.formulas), max_bands=max_bands, formulas=s.formulas, base_bands=base)
-        res["base_unknown"] += sum(1 for b in kept if not b.get("editable") and b.get("enabled") is not False)
         res["max_bands"] = max_bands
         res["kept"] = [{"ix": b.get("ix"), "type": b.get("type_code"), "freq": b.get("freq"),
-                        "editable": bool(b.get("editable"))} for b in kept]
+                        "editable": bool(b.get("editable"))} for b in in_slots]
         return res
 
     async def _default_finder(self) -> dict | None:
@@ -419,9 +443,11 @@ class WebServer:
         return {
             "app": "SUMEL", "version": 1, "created": time.strftime("%Y-%m-%d %H:%M"),
             "speaker": {"name": s.get("name"), "host": s.get("host"), "versions": s.get("versions")},
+            # bare bånd SUMEL kan skrive: låste/ukjente filtre og plass 3+ kan ikke gjenopprettes herfra
             "device": {"room_correction": s.get("room_correction"), "manual_eq": s.get("manual_eq"),
                        "bands": [{"type": b["type_code"], "freq": b["freq"], "q": b["q"], "gain": b["gain"],
-                                  "enabled": b["enabled"] is not False} for b in s.get("bands", [])]},
+                                  "enabled": b["enabled"] is not False} for b in s.get("bands", [])
+                                 if b.get("editable") is True]},
             "profiles": [p for p in (self.profiles.all() if self.profiles else []) if not p.get("builtin")],
             "profile_overrides": self.profiles.overrides() if self.profiles else {},  # endrede innebygde profiler
             "learned_formulas": self.config["learned_formulas"] if self.config else {},

@@ -70,6 +70,7 @@ class SpeakerAgainstFake(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.fake.volume, 20)
         await self.sp.set_power(True)  # er allerede på: ingen veksling
         self.assertNotIn((0x02, 0x0F), {(f[3], f[4]) for f in self.fake.received})
+        await self.sp.select_source(2)  # inngangen før standby (ikke Streaming)
         await self.sp.set_power(False)
         self.assertFalse(self.fake.power)
         woke = []
@@ -77,13 +78,15 @@ class SpeakerAgainstFake(unittest.IsolatedAsyncioTestCase):
         async def fake_wake(host, local_ip):  # simulerer DLNA-vekking: kilde blir Streaming
             woke.append(host)
             self.fake.power, self.fake.source = True, 4
-            self.fake._broadcast(bytes.fromhex("000400020e01"))
+            self.fake._broadcast(bytes.fromhex("000400020e01"))  # bare «på», kildebyttet meldes ikke
 
         self.sp.waker = fake_wake
         await self.sp.set_power(True)
         self.assertEqual(woke, ["127.0.0.1"])
         self.assertTrue(self.sp.state["power"])
-        self.assertEqual(self.fake.source, 4 if self.sp.state["source"] == 4 else self.sp.state["source"])
+        # tilbake til inngangen fra før standby, i høyttaleren og i tilstanden
+        self.assertEqual((self.fake.source, self.sp.state["source"]), (2, 2))
+        self.assertEqual(self.fake.received.count(p.select_source(2)), 2)  # før standby og etter vekking
 
     async def test_eq_write_roundtrip(self):
         from lemus_remote.eqskrivetest import Conn

@@ -240,7 +240,12 @@ Request bands of preset 0 (the vendor app's editing slot):
 ```
 
 If there are no bands, the speaker sends nothing. Use a timeout and treat silence as an
-empty list. **Confirmed**
+empty list. **Confirmed** Exception: right after a wake from standby the DSP needs a few
+seconds (about 8 s per the datasheet) before it answers. SUMEL does not treat silence as an
+empty list until the DSP has answered once after the wake, or 10 s have passed, so a filter
+it has not seen is never overwritten. The same applies after every new connection on 50006
+(SUMEL starting, or the speaker coming back after being switched off), since the speaker may
+just have been powered on; the bands are read again when the 10 s have passed.
 
 Example (captured): `00 0f 00 08 04 02 00 09 07 01 03 00 01 00 02 00 02`
 = slot 0, Parametric EQ, 300 Hz, Q 1.00, +2.00 dB, on.
@@ -324,7 +329,8 @@ the read a few times before declaring failure. **Confirmed**
 ```
 
 Examples: delete slot 2 = `00 07 12 08 06 01 02 01 00`; turn slot 1 off =
-`00 07 12 08 06 01 01 01 01`.
+`00 07 12 08 06 01 01 01 01`. SUMEL sends `08 06` only for slots 0–2 (see
+[Safety: only three EQ slots](#8-safety)); slot 3 and higher are not touched.
 
 | Fact | Status |
 |---|---|
@@ -516,8 +522,11 @@ The SM450's LS9 is plain TCP. A future firmware could change this. **Observed** 
   **Hypothesis**, not verified.
 
 SUMEL enforces the limit at the lowest level (`protocol.MAX_BANDS = 3`): no frame with
-coefficients can be built for slot 3 or higher. A band found in slot 3+ is shown as
-read-only and can only be deleted.
+coefficients, and no on/off or delete frame (`08 06`), can be built for slot 3 or higher.
+A band found in slot 3+ is shown as read-only and is **never touched** (no change, no on/off,
+no delete). It also takes none of the three slots: SUMEL keeps using slots 0–2 next to it. To get rid of it, switch the speaker fully off at the mains (power switch or wall
+socket) for 10 seconds; that probably reloads the factory configuration. **Hypothesis**, not
+verified.
 
 ### Never touch
 

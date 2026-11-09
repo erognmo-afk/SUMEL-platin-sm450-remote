@@ -42,6 +42,17 @@ DEFAULTS: dict[str, Any] = {
     "max_volume_step": 25,   # største volumhopp i én kommando
 }
 
+VOLUME_STEP_MIN, VOLUME_STEP_MAX = 2, 25  # grensene for max_volume_step (de samme som i appen)
+
+
+def volume_step(value: Any) -> int:
+    """max_volume_step lest fra config.json, klemt til 2-25. Mangler eller ugyldig: 25."""
+    try:
+        step = int(value)
+    except (TypeError, ValueError, OverflowError):
+        return DEFAULTS["max_volume_step"]
+    return max(VOLUME_STEP_MIN, min(VOLUME_STEP_MAX, step))
+
 
 class Config:
     def __init__(self, path: Path | None = None) -> None:

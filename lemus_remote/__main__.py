@@ -21,7 +21,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from . import __version__
-from .config import Config
+from .config import Config, volume_step
 from .device import Speaker
 from .discovery import Found, discover, scan_skip_reason
 from .profiles import ProfileStore
@@ -370,7 +370,7 @@ async def run(args: argparse.Namespace, on_ready: Callable[[Running], None] | No
 
     speaker = Speaker(cfg["host"], use_luci=not args.no_luci, resolver=resolver, name=cfg["name"],
                       learned=cfg["learned_formulas"], disable_mode=cfg["disable_mode"], on_learn=on_learn,
-                      max_volume_step=int(cfg["max_volume_step"] or 25), on_connect=on_connect)
+                      max_volume_step=volume_step(cfg["max_volume_step"]), on_connect=on_connect)
     lan = LanAddress(port, speaker.host)
     web = WebServer(speaker, "127.0.0.1" if args.local_only else "0.0.0.0", port,
                     config=cfg, profiles=ProfileStore(cfg), require_auth=not args.no_auth,
