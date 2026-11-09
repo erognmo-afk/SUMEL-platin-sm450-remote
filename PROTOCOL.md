@@ -377,8 +377,12 @@ is saved as "off" (unity coefficients or unchanged coefficients); this is not ye
 
 ## 5. Room correction curve
 
-Room correction is measured and calculated in the vendor app; the result is stored in the
-speaker. Over the network we can only switch it on/off (`07 01`) and read the stored curve.
+Room correction is measured with the vendor app; the result is stored in the speaker.
+*Hypothesis:* the filters are calculated in the app and uploaded (the app contains names such as
+`calcRoomEqFilter` and `biquadFilters`). The datasheet shows room correction as its own two-channel
+filter block, controlled by the firmware and switched on/off as a whole; it is separate from the
+three biquads reserved for the app EQ, and its address and number of filters are not given.
+Over the network we can only switch it on/off (`07 01`) and read the stored curve.
 
 ```
 → 00 03 10 07 09
