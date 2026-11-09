@@ -195,7 +195,7 @@ python tools/dev_server.py 8090
 
 Then open http://localhost:8090. `--find-none` simulates a network where discovery finds nothing; `--no-native-mute` exercises the mute fallback.
 
-**Windows installer.** `packaging/` holds the PyInstaller spec, the Inno Setup script (Norwegian and English) and `build.ps1`. The GitHub Actions workflow `.github/workflows/windows.yml` runs the tests on Windows, builds `SUMEL.exe` and `SUMEL-Setup-<version>.exe`, smoke-tests the exe and a silent install/uninstall, and uploads the **SUMEL-Setup** artifact. It runs on **Run workflow** or when a `v*` tag is pushed; a tag also publishes the installer as a GitHub Release. Locally on Windows (Inno Setup 6.3+):
+**Windows installer.** `packaging/` holds the PyInstaller spec, the Inno Setup script (Norwegian and English) and `build.ps1`. The GitHub Actions workflow `.github/workflows/windows.yml` runs the tests on Windows, builds `SUMEL.exe` and `SUMEL-Setup-<version>.exe`, smoke-tests the exe and a silent install/uninstall, and uploads the **SUMEL-Setup** artifact. It runs on **Run workflow** or when a `v*` tag is pushed. A tag, or **Run workflow** with *release* ticked, also publishes the installer as a GitHub Release. Locally on Windows (Inno Setup 6.3+):
 
 ```powershell
 py -m pip install -r requirements-windows.txt

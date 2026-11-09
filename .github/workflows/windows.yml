@@ -13,6 +13,11 @@ name: Windows-program
 # ikke ved hver push.
 on:
   workflow_dispatch:
+    inputs:
+      release:
+        description: "Publiser installasjonsprogrammet som GitHub Release (taggen v<versjon> lages automatisk)"
+        type: boolean
+        default: false
   push:
     tags: ["v*"]
 
@@ -144,10 +149,12 @@ jobs:
           Write-Host 'Installasjon, brannmurregel, Start med Windows og avinstallering virker'
           exit 0
 
-  # Når en versjon tagges (git tag v0.10.0 && git push origin v0.10.0), publiseres
-  # installasjonsprogrammet som en GitHub Release, så alle kan laste det ned uten å logge inn.
+  # Når en versjon tagges (git tag v0.10.0 && git push origin v0.10.0), eller når «Run workflow»
+  # kjøres med «release» på, publiseres installasjonsprogrammet som en GitHub Release, så alle kan
+  # laste det ned uten å logge inn. Uten tag lages taggen v<versjon> fra filnavnet
+  # SUMEL-Setup-<versjon>.exe, på commiten som ble bygget.
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.release)
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -160,9 +167,14 @@ jobs:
       - name: Publiser release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
         run: |
           ls -l dist
+          if [ -z "$TAG" ]; then
+            f=$(ls dist | head -1); v=${f#SUMEL-Setup-}; v=${v%.exe}
+            case "$v" in [0-9]*.[0-9]*) TAG="v$v" ;; *) echo "fant ikke versjon i $f"; exit 1 ;; esac
+          fi
+          echo "Release $TAG på $GITHUB_SHA"
           cat > notes.md <<NOTES
           **SUMEL $TAG** – unofficial remote for speakers with Platin SM450 (tested on Lemus HOME 1500).
 
@@ -174,4 +186,4 @@ jobs:
 
           Unofficial and not affiliated with Lemus or Platin. Use at your own risk. See README for details.
           NOTES
-          gh release create "$TAG" dist/*.exe --repo "$GITHUB_REPOSITORY" --title "SUMEL $TAG" --notes-file notes.md
+          gh release create "$TAG" dist/*.exe --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "SUMEL $TAG" --notes-file notes.md
