@@ -91,8 +91,9 @@ RestartApplications=no
 ShowLanguageDialog=auto
 
 [Languages]
-Name: "norwegian"; MessagesFile: "compiler:Languages\Norwegian.isl"
+; Engelsk først: brukes når Windows ikke er på norsk. Norsk Windows får norsk.
 Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "norwegian"; MessagesFile: "compiler:Languages\Norwegian.isl"
 
 [Messages]
 norwegian.WelcomeLabel2=Dette installerer [name/ver] – fjernkontroll for Platin SM450.%n%nSUMEL er et uoffisielt program. Det er ikke laget av Lemus eller Platin. Bruk på egen risiko. Testet på Lemus HOME 1500.%n%nEr Lemus Remote installert fra før, blir den oppgradert til SUMEL. Innstillingene beholdes.

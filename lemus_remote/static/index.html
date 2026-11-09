@@ -971,7 +971,7 @@ html[data-front="alu"] .fp-body { padding-top:22px; }
         <h2 data-i18n="curve.filters">Filtrene</h2>
         <div class="fit-head"><span class="big num" id="fitErr">–</span><span class="small muted" id="fitErrLbl"></span></div>
         <div class="fit-list" id="fitList"></div>
-        <p class="small muted" style="margin:12px 0 0" data-i18n="curve.explain">SM450 har plass til tre filtre. Appen prøver alle filtertyper, frekvenser og bredder og velger de som til sammen ligger nærmest kurven din. Ingenting sendes til høyttaleren før du trykker «Bruk».</p>
+        <p class="small muted" style="margin:12px 0 0" data-i18n="curve.explain">SM450 har plass til tre filtre. Appen prøver parametriske filtre og bass- og diskantfiltre (shelving) med ulike frekvenser og bredder og velger de som til sammen ligger nærmest kurven din. Ingenting sendes til høyttaleren før du trykker «Bruk».</p>
       </div>
       <div class="card">
         <h2 data-i18n="curve.saveTitle">Lagre som profil</h2>
@@ -1068,7 +1068,7 @@ html[data-front="alu"] .fp-body { padding-top:22px; }
   <div class="page-title"><h1 data-i18n="nav.more">Mer</h1><p data-i18n="more.lead">Hjelp, høyttaler og tilkobling.</p></div>
   <div class="card faq" id="helpCard">
     <h2 data-i18n="help.title">Hjelp</h2>
-    <details id="helpPhone"><summary data-i18n="help.q1">iPhone får ikke kontakt</summary><div class="ans" data-i18n-html="help.a1"><ul><li>iPhone og PC-en må være på samme nettverk (samme ruter), og PC-en må være våken.</li><li>Noen rutere, for eksempel Telia HomeBox, holder Wi-Fi-enheter fra hverandre. Koble da PC-en til ruteren med kabel, eller bruk Tailscale på både PC-en og iPhone.</li><li>Windows-brannmuren og Norton eller annet antivirus må tillate SUMEL. Velg «Tillat» når de spør, eller legg SUMEL til som unntak.</li></ul></div></details>
+    <details id="helpPhone"><summary data-i18n="help.q1">iPhone får ikke kontakt</summary><div class="ans" data-i18n-html="help.a1"><ul><li>iPhone og PC-en må være på samme nettverk (samme ruter), og PC-en må være våken.</li><li>Noen rutere holder Wi-Fi-enheter fra hverandre. Koble da PC-en til ruteren med kabel, eller bruk Tailscale på både PC-en og iPhone.</li><li>Windows-brannmuren og Norton eller annet antivirus må tillate SUMEL. Velg «Tillat» når de spør, eller legg SUMEL til som unntak.</li></ul></div></details>
     <details id="helpFind"><summary data-i18n="help.q2">«Finn høyttaleren» finner ingenting</summary><div class="ans" data-i18n-html="help.a2"><p>Sjekk at høyttaleren har strøm og er koblet til samme nettverk som PC-en.</p><p>Skriv så høyttalerens IP-adresse under «Tilkobling», for eksempel 192.168.0.6. Adressen står i ruterens liste over tilkoblede enheter.</p></div></details>
     <details id="helpTone"><summary data-i18n="help.q3">Hvorfor endrer tonehjulene EQ-en?</summary><div class="ans" data-i18n-html="help.a3"><p>SM450 har plass til tre filtre. Tonehjulene og EQ-fanen deler de samme tre. Drar du et tonehjul mens EQ-en har en kurve eller egne punkter, gjøres den om til bass, mellomtone og diskant, slik at lyden endres minst mulig. Du kan alltid angre.</p></div></details>
     <details id="helpMode"><summary data-i18n="help.q4">Kurve eller Punkter?</summary><div class="ans" data-i18n-html="help.a4"><p><b>Kurve:</b> tegn lyden du vil ha med ti punkter, så finner appen de tre filtrene som passer best. Ingenting sendes før du trykker «Bruk».</p><p><b>Punkter:</b> still de tre filtrene direkte, med frekvens, nivå og bredde. Hver endring sendes med en gang.</p></div></details>
@@ -1307,7 +1307,7 @@ const I18N = {
     "curve.hintKbd": "Drag the points straight up and down (±12 dB). Double-click a point to set it to 0. Keyboard: <kbd>←</kbd><kbd>→</kbd> choose point, <kbd>↑</kbd><kbd>↓</kbd> ±0.5 dB, <kbd>Shift</kbd> bigger steps, <kbd>0</kbd> to 0.",
     "curve.hintTouch": "Drag the points straight up and down (±12 dB). Double-tap sets a point to 0. Nothing is sent to the speaker until you press “Apply”.",
     "curve.filters": "The filters",
-    "curve.explain": "The SM450 has room for three filters. The app tries all filter types, frequencies and widths and picks the ones that together come closest to your curve. Nothing is sent to the speaker until you press “Apply”.",
+    "curve.explain": "The SM450 has room for three filters. The app tries parametric and low/high shelf filters at many frequencies and widths and picks the ones that together come closest to your curve. Nothing is sent to the speaker until you press “Apply”.",
     "curve.saveTitle": "Save as profile", "curve.namePh": "Name, e.g. “Evening curve”", "curve.nameAria": "Profile name",
     "curve.saveNote": "The profile remembers both the curve and the three filters. If you use the profile later, the curve is filled in here again.",
     "curve.maxErr": "max deviation", "curve.flat": "Flat curve – no filters needed.", "curve.untouched": "Drag a point to calculate the filters.",
@@ -1367,7 +1367,7 @@ const I18N = {
     "more.home3": "Choose “Add to Home Screen” and tap “Add”.", "more.homeDone": "SUMEL is on your Home Screen.",
     "help.title": "Help", "help.q1": "The iPhone can’t connect", "help.q2": "“Find the speaker” finds nothing",
     "help.q3": "Why do the tone knobs change the EQ?", "help.q4": "Curve or Points?",
-    "help.a1": "<ul><li>The iPhone and the PC must be on the same network (the same router), and the PC must be awake.</li><li>Some routers, for example Telia HomeBox, keep Wi-Fi devices apart. Then connect the PC to the router with a cable, or use Tailscale on both the PC and the iPhone.</li><li>Windows Firewall and Norton or other antivirus must allow SUMEL. Choose “Allow” when they ask, or add SUMEL as an exception.</li></ul>",
+    "help.a1": "<ul><li>The iPhone and the PC must be on the same network (the same router), and the PC must be awake.</li><li>Some routers keep Wi-Fi devices apart. Then connect the PC to the router with a cable, or use Tailscale on both the PC and the iPhone.</li><li>Windows Firewall and Norton or other antivirus must allow SUMEL. Choose “Allow” when they ask, or add SUMEL as an exception.</li></ul>",
     "help.a2": "<p>Check that the speaker has power and is connected to the same network as the PC.</p><p>Then enter the speaker’s IP address under “Connection”, for example 192.168.0.6. The address is in the router’s list of connected devices.</p>",
     "help.a3": "<p>The SM450 has room for three filters. The tone knobs and the EQ tab share the same three. If you turn a tone knob while the EQ has a curve or your own points, it’s turned into bass, mid and treble so the sound changes as little as possible. You can always undo.</p>",
     "help.a4": "<p><b>Curve:</b> draw the sound you want with ten points, and the app finds the three filters that fit best. Nothing is sent until you press “Apply”.</p><p><b>Points:</b> set the three filters directly, with frequency, level and width. Every change is sent right away.</p>",

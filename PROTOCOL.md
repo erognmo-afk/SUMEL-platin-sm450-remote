@@ -13,7 +13,7 @@ SUMEL is unofficial and not affiliated with or endorsed by any manufacturer. "Le
 > **Use at your own risk.** The control ports have no authentication and address the
 > DSP and the firmware directly. Some commands on these ports can factory-reset the
 > device, start a firmware update or overwrite the manufacturer's speaker tuning. Read
-> [Safety](#safety) before you send anything.
+> [Safety](#8-safety) before you send anything.
 
 ## Status labels
 
@@ -41,7 +41,7 @@ Hex is written byte by byte, e.g. `00 03 0f 02 0d`. `<cs>` means the checksum by
 5. [Room correction curve](#5-room-correction-curve)
 6. [Power and waking from standby](#6-power-and-waking-from-standby)
 7. [TCP 7777: LUCI](#7-tcp-7777-luci)
-8. [Safety](#safety)
+8. [Safety](#8-safety)
 9. [Discovery](#9-discovery)
 10. [Unknown and open questions](#10-unknown-and-open-questions)
 11. [References](#11-references)
@@ -104,7 +104,7 @@ def control_frame(cls: int, op: int, data: bytes = b"") -> bytes:
 |---|---|
 | Frames built with the real checksum are accepted. | **Confirmed** |
 | Frames **from the speaker** carry `00` in the checksum position. SUMEL uses `checksum == 0` to tell device frames from requests sent by other clients. | **Confirmed** |
-| The vendor app always puts `03` in the checksum byte of its EQ write frames, and the speaker accepts them. So the firmware probably does not validate the checksum. | **Observed** / **Hypothesis** |
+| In every vendor-app frame we captured (EQ band writes and deletes), the checksum byte was `03`, and the speaker accepted them. So the firmware probably does not validate the checksum. | **Observed** / **Hypothesis** |
 | A frame length above about 1 KB has never been seen. If the length field looks impossible, drop one byte and resynchronise. | implementation advice |
 
 ### Broadcast behaviour
@@ -138,9 +138,9 @@ Consequences for a client:
 
 | Fact / advice | Status |
 |---|---|
-| The **first connection attempts are often refused or fail**. In the first test the first connection failed twice and then worked. Retry with a short back-off (SUMEL waits 1 s, then 2 s, and keeps retrying every few seconds). | **Observed** |
+| The **first connection attempts are often refused or fail**. In the first test the first connection failed twice and then worked. Retry: SUMEL's discovery check tries three times (pausing 1 s, then 2 s), and the control connection keeps retrying every 3 s. | **Observed** |
 | A connection that only listens never notices that the speaker has gone away (Wi-Fi drop, power loss). | **Observed** |
-| SUMEL sends harmless reads every **10 s** on 50006 (room correction, power, source list, manual EQ). These double as keep-alive and catch changes that are not broadcast. | **Confirmed** (works for days) |
+| SUMEL sends harmless reads every **10 s** on 50006 (room correction, power, source list, manual EQ). These double as keep-alive and catch changes that are not broadcast. | implementation advice |
 | If **no data at all** arrives for **45 s**, SUMEL treats the connection as dead, closes it and reconnects. | implementation advice |
 | On 7777, SUMEL sends a volume query every **30 s** as keep-alive, with the same 45 s watchdog. | implementation advice |
 | Space out bursts of commands slightly (SUMEL waits about 0.2 s between start-up reads). | implementation advice |
@@ -201,9 +201,9 @@ activity). Captured: `00 05 00 02 21 01 0d` = source 1, volume 13.
 | Select source *ix* | `00 04 <cs> 02 03 <ix>`, e.g. `00 04 09 02 03 04` (Streaming) | `02 02` + `02 21` with the new source. Ignored in standby. | **Confirmed** |
 | Power toggle | `00 04 11 02 0f 00` | **Toggles.** Turns the speaker off when on. Ignored in standby. See [section 6](#6-power-and-waking-from-standby). | **Confirmed** (off) |
 | Select preset 1–3 | `00 07 <cs> 08 02 01 <n> 01 02` | On SM450 the EQ changes for a few seconds and then **reverts** to preset 0. Not useful. | **Confirmed** (behaviour) |
-| Write EQ band | `08 01 ...` (35 bytes) | see [section 4](#4-eq-bands) | **Confirmed** |
-| Band on / off / delete | `00 07 <cs> 08 06 01 <ix> 01 <state>` | see [section 4](#4-eq-bands) | **Confirmed** |
-| Remote pairing | `03 03` (sent by the vendor app from its "Remote pairing" menu); the speaker answered `03 02 00` | Pairs the RF remote. Never sent by us. | **Observed** |
+| Write EQ band | `00 23 <cs> 08 01 ...` (37-byte frame, length field 35) | see [section 4](#4-eq-bands) | **Confirmed** (Parametric EQ) |
+| Band on / off / delete | `00 07 <cs> 08 06 01 <ix> 01 <state>` | see [section 4](#4-eq-bands) | **Confirmed** (delete), **Observed** (on/off) |
+| Remote pairing? | `03 03` | A frame with class `03`, opcode `03` was recorded in traffic. The vendor app contains names such as `REMOTE_PAIRING_GET/SET`, so it is probably related to pairing the RF remote. The reply and data were not decoded. Never sent by us. | **Observed** (meaning: **Hypothesis**) |
 | Unknown, after EQ changes | `07 0d 06` | The vendor app sends it after each band change. Meaning unknown. | **Observed** (not sent by us) |
 
 > **Preset warning.** In `08 02 01 <n> 01 <op>` the last byte **must be `02` (select)**.
@@ -228,7 +228,7 @@ or LUCI box `0x40`. **Confirmed**
 The vendor app's "manual EQ" is a short list of filters ("bands") stored in the speaker.
 Each band has a fixed slot (index). Slots do not move when another band is deleted.
 
-**Only slots 0, 1 and 2 may be written.** See [Safety](#safety).
+**Only slots 0, 1 and 2 may be written.** See [Safety](#8-safety).
 
 ### Reading bands (`08 04`)
 
@@ -297,8 +297,8 @@ as five biquad coefficients followed by the band parameters.
 [ b2, b1, b0, −a2, −a1 ]   all divided by a0
 ```
 
-computed for **fs = 48 kHz**. **Confirmed** (our coefficients are accepted, and read-back
-shows the new values).
+computed for **fs = 48 kHz**. **Confirmed** (the speaker accepts our coefficients, and reading
+the band back shows the new band values; the coefficients themselves cannot be read back).
 
 Full example, slot 0, Parametric EQ, 1000 Hz, Q 1.00, +2.00 dB, on:
 
@@ -328,8 +328,9 @@ Examples: delete slot 2 = `00 07 12 08 06 01 02 01 00`; turn slot 1 off =
 
 | Fact | Status |
 |---|---|
-| Delete works; other bands keep their slots (deleting slot 1 of 0/1/2 left 0 and 2). | **Confirmed** |
-| Off/on works; read-back shows byte 9 = `01` / `02`. | **Confirmed** |
+| Delete works when sent by SUMEL. | **Confirmed** |
+| Other bands keep their slots (in a vendor-app capture, deleting slot 1 of 0/1/2 left 0 and 2; the next delete used index 2). | **Observed** |
+| Off/on: the vendor app sends state `01`/`02`, the speaker acknowledges, and read-back shows byte 9 = `01` / `02`. SUMEL sends the same frame, but this was not tested separately. | **Observed** |
 
 ### Filter formulas
 
@@ -340,7 +341,7 @@ five** coefficients match to within **±1 LSB** (2⁻²⁴; two of six peaking c
 
 | Type | Formula | Status |
 |---|---|---|
-| `07` Parametric | RBJ Audio EQ Cookbook *peakingEQ* with the band's Q | **Confirmed** bit-exact (6 captures, gains −3…+3 dB, Q 1 and 2) and written by us |
+| `07` Parametric | RBJ Audio EQ Cookbook *peakingEQ* with the band's Q | **Confirmed**: 4 of 6 captures bit-exact, 2 within 1 LSB (gains −3…+3 dB, Q 1 and 2), and written by us |
 | `06` Low shelving | RBJ *lowShelf*, fixed shelf slope **S = 1** (Q ignored) | **Observed** bit-exact (±1 LSB) |
 | `05` High shelving | RBJ *highShelf*, S = 1 | **Observed** bit-exact (±1 LSB) |
 | `02` 12 dB high-pass | RBJ *HPF* with the band's Q | **Observed** bit-exact (±1 LSB) |
@@ -384,8 +385,8 @@ speaker. Over the network we can only switch it on/off (`07 01`) and read the st
 ← 00 8f 00 07 0a <140 bytes>          (length 0x8f = 143 = checksum + class + opcode + 140)
 ```
 
-The curve is fixed: the vendor app reads the same bytes every time it opens its room-EQ
-screen. **Confirmed**
+The curve is stored in the speaker: when the vendor app opened its room-EQ screen, the reply
+was byte for byte the same as in our earlier read. **Observed**
 
 | Bytes | Content | Status |
 |---|---|---|
@@ -456,7 +457,7 @@ The header is 10 bytes.
 ### Registration
 
 Right after connecting, register by sending your own LAN IP address as ASCII to box
-`0x0003`. Without it you receive no notifications. **Confirmed**
+`0x0003`. **Confirmed** (SUMEL always registers first; behaviour without registration has not been tested.)
 
 ```
 00 00 02 03 00 00 00 00 0b 00  31 39 32 2e 31 36 38 2e 30 2e 39      "192.168.0.9"
@@ -468,7 +469,7 @@ Right after connecting, register by sending your own LAN IP address as ASCII to 
 |---|---|---|---|
 | `0x0040` (64) | **Volume** 0–100, ASCII decimal. Query or set. The speaker reports changes. | set 13: `00 00 02 40 00 00 00 00 02 00 31 33`; query: `00 00 01 40 00 00 00 00 00 00` | **Confirmed** |
 | `0x0028` (40) | **Transport**: `PLAY`, `PAUSE`, `STOP`, `NEXT`, `PREV` (streaming sources) | pause: `00 00 02 28 00 00 00 00 05 00 50 41 55 53 45` | **Confirmed** (play/pause/next/prev) |
-| `0x0033` (51) | **Play state** notifications, ASCII number: `0` playing, `1` stopped, `2` paused, `5` loading | | **Observed** |
+| `0x0033` (51) | **Play state** notifications, ASCII number: `0` playing, `1` stopped, `2` paused, `5` loading (values as documented by aiolibresync for the Stereo Hub; SUMEL only listens) | | **Hypothesis** for SM450 (not recorded in our log) |
 | `0x003F` (63) | **Mute** state: the speaker reports `MUTE` / `UNMUTE` when the RF remote's mute key is pressed. Volume is not changed. No 50006 traffic is produced. | | **Observed** |
 | `0x003F` (63) | **Mute command**: sending `MUTE` / `UNMUTE` (type 2) to the same box, and querying it (type 1). | `00 00 02 3f 00 00 00 00 04 00 4d 55 54 45` | **Hypothesis** |
 | `0x0070` (112) | **Tunnel**: the payload contains one or more 50006-format frames that **other clients** (the vendor app) send to the control MCU. Use it to follow and learn from the vendor app. | | **Observed** |
@@ -493,7 +494,7 @@ The SM450's LS9 is plain TCP. A future firmware could change this. **Observed** 
 
 ---
 
-## Safety
+## 8. Safety
 
 ### Only three EQ slots
 
@@ -592,7 +593,7 @@ together with Bonjour `_googlecast._tcp`. **Observed** (SUMEL does not use it.)
 | `07 0d 06` | Sent by the vendor app after every EQ change. Unknown. |
 | `02 4e` | Appeared when another client connected. Not decoded. |
 | Mute command on box `0x3F` | Status messages are observed; whether the box accepts `MUTE`/`UNMUTE` is untested. |
-| Remote pairing (`03 03`) | Seen from the vendor app only. Request/response details beyond `03 02 00` are not decoded. |
+| Remote pairing (`03 03`) | A `03 03` frame was recorded; that it pairs the RF remote is a guess based on names in the vendor app. Data and reply are not decoded. Never sent by us. |
 | Standby time / auto-standby | Names exist in the vendor app, but there is no such setting for the SM450, and the datasheet says the 20-minute timeout is fixed. |
 | Input balance, loudness | Only names seen in the vendor app. No frames captured. |
 | Firmware changes | The protocol may change with any automatic firmware update. |
