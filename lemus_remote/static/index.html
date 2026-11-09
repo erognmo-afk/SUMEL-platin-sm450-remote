@@ -844,6 +844,25 @@ html[data-front="alu"] .deck { padding:0; }
   .deck .deck-sec:last-of-type { padding-right:36px; }
   .deck .chip { font-size:11px; min-height:40px; padding:0 11px; letter-spacing:.08em; gap:6px; }
 }
+/* Lyd-knappene i nedre rad: bare lampe og navn – lampen viser av/på (ingen «På/Av»-tekst og ingen forklaring) */
+.deck .tog { min-height:44px; padding:0 14px; gap:10px; }
+.deck .tog .t small, .deck .tog .state { display:none; }
+.deck .tog .lamp { width:6px; height:6px; }
+.deck .tog[aria-checked="true"] .t b { color:var(--fg); }
+.deck .tog .t b { color:var(--muted); }
+/* PC: avspillingsknappene i samme stil og høyde som inngangsvelgeren, i en innfelt brønn på samme linje */
+@media (min-width: 1000px) {
+  .deck .tog { min-height:40px; }
+  .fp-ctrl { align-items:center; }
+  .fp-ctrl .transport { gap:6px; padding:3px; border-radius:var(--radius-s); background:var(--well);
+    border:1px solid var(--line); box-shadow:inset 0 1px 3px rgba(0,0,0,.6); }
+  .fp-ctrl .transport .round, .fp-ctrl .transport .round.main { width:52px; height:36px; border-radius:var(--radius-xs);
+    border:1px solid rgba(0,0,0,.55); background:linear-gradient(180deg, #2a2825, #201f1d); color:var(--muted);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 2px 5px rgba(0,0,0,.35); }
+  .fp-ctrl .transport .round:hover:not(:disabled) { color:var(--fg); }
+  .fp-ctrl .transport .round:active:not(:disabled) { background:linear-gradient(180deg, #22201e, #1b1a18); box-shadow:inset 0 2px 5px rgba(0,0,0,.55); }
+  .fp-ctrl .transport .round svg { width:14px; height:14px; }
+}
 </style>
 </head>
 <body>
