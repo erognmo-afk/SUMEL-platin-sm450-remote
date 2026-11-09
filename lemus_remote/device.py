@@ -25,7 +25,7 @@ CONTROL_PORT = 50006
 LUCI_PORT = 7777
 
 # Funksjoner som er prøvd og bekreftet på vår egen SM450 (se docs/lesetest-resultat.md).
-# Resten virker på Platin Stereo Hub, og websiden ber om bekreftelse før de brukes.
+# Listen brukes i dag bare til visning; websiden spør ikke før andre funksjoner brukes (sikker modus mangler, se oppgave #7).
 VERIFIED = {"manual_eq", "room_correction", "volume", "transport", "eq_bands", "power", "source"}  # bekreftet 8.11.2026
 
 # Preset 1-3 er tatt ut: på SM450 faller de tilbake til Platin-appens kurve.

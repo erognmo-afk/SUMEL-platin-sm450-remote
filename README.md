@@ -165,7 +165,7 @@ SUMEL looks for devices that describe themselves as **Libre Wireless / LibreSync
 | Newer Platin modules (for example SM455) or Libre LS10-based devices | Unknown. LS10 is reported (by a third party) to wrap port 7777 in TLS, so volume and transport would likely not work |
 | Platin Stereo Hub | Same LibreSync protocol family, but the SM450 differs in several places (source codes, frame formats, EQ). Not tested or supported; see [aiolibresync](https://github.com/drsound/aiolibresync) |
 
-**Have a different model?** Please open an issue with the model name, the firmware versions (shown under **More → Speaker**) and what worked or didn't. Untested features ask for confirmation in the UI before they are used.
+**Have a different model?** Please open an issue with the model name, the firmware versions (shown under **More → Speaker**) and what worked or didn't. Note: SUMEL does not check the model yet. Every control, including EQ and profiles, is available as soon as it connects, and applying a profile replaces the filters in the three app EQ slots (Undo can bring them back). On another model, try volume and input first.
 
 ## How it works
 
