@@ -862,6 +862,9 @@ html[data-front="alu"] .deck { padding:0; }
   .fp-ctrl .transport .round:hover:not(:disabled) { color:var(--fg); }
   .fp-ctrl .transport .round:active:not(:disabled) { background:linear-gradient(180deg, #22201e, #1b1a18); box-shadow:inset 0 2px 5px rgba(0,0,0,.55); }
   .fp-ctrl .transport .round svg { width:14px; height:14px; }
+  /* inngangsknappene like brede (bredden fra det lengste navnet) */
+  .fp-ctrl .inputs .sel { display:grid; grid-auto-flow:column; grid-auto-columns:1fr; }
+  .fp-ctrl .inputs .sel .src { justify-content:center; }
 }
 </style>
 </head>

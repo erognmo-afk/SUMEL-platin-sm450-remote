@@ -14,6 +14,7 @@ Downloads are on the [releases page](https://github.com/erognmo-afk/SUMEL-platin
 - The lower row (Sound and Profile) now looks like part of the amplifier: walnut sides, engraved labels and buttons in a recessed well, aligned with the front panel.
 - Room correction and Custom EQ in the lower row show only a lamp and the name (no "On/Off" text or explanation).
 - On a PC, the previous/play/next buttons match the input selector and sit on the same line.
+- The input buttons have the same width.
 
 ### Known issue
 
