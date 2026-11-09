@@ -430,6 +430,14 @@ def decode_room_curve(raw: bytes) -> dict | None:
     return {"measured": curve(raw[2:71]), "result": curve(raw[72:140])}
 
 
+def room_curve_is_empty(raw: bytes) -> bool:
+    """True når romkurven ikke er en ekte måling: begge kurvene er helt flate (for eksempel bare
+    nuller eller bare 100). En ekte måling varierer alltid fra punkt til punkt."""
+    if raw is None or len(raw) != 140:
+        return False
+    return len(set(raw[2:71])) <= 1 and len(set(raw[72:140])) <= 1
+
+
 def readback_safe_q(q: float | None, lo: float = 0.1, hi: float = 20.0) -> float | None:
     """Velg en Q (to desimaler) som parse_band leser tilbake som nøyaktig samme tall.
 

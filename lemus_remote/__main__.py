@@ -245,7 +245,7 @@ async def search(cfg: Config, speaker: Speaker | None, name: str | None = None, 
 
 
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(prog="lemus_remote", description="SUMEL – uoffisiell fjernkontroll for Platin SM450 (Lemus HOME)")
+    ap = argparse.ArgumentParser(prog="lemus_remote", description="SUMEL – uoffisiell fjernkontroll for høyttalere med Platin SM450 (testet på Lemus HOME 1500)")
     ap.add_argument("--host", default=None, help="høyttalerens IP-adresse (lagres). Uten denne finnes den automatisk")
     ap.add_argument("--auto", action="store_true", help="glem lagret adresse og finn høyttaleren automatisk")
     ap.add_argument("--name", default=None, help="velg høyttaler etter navn når flere finnes, f.eks. \"1500\"")
@@ -331,7 +331,7 @@ async def run(args: argparse.Namespace, on_ready: Callable[[Running], None] | No
             miss = "; ".join(notes)
             if miss != last_miss[0]:  # samme melding hvert minutt hjelper ingen
                 last_miss[0] = miss
-                print("Fant ingen Lemus-høyttaler ennå (" + miss + "). Prøver igjen ...")
+                print("Fant ingen SM450-høyttaler ennå (" + miss + "). Prøver igjen ...")
                 print("  Tips: " + ("tillat SUMEL.exe i brannmuren/antivirusprogrammet" if tray
                                     else "tillat Python i Windows-brannmuren")
                       + ", eller skriv adressen under «Mer» i appen.")
@@ -348,7 +348,7 @@ async def run(args: argparse.Namespace, on_ready: Callable[[Running], None] | No
         """«Finn automatisk» i appen: ett søk. Webserveren bytter adresse bare ved treff."""
         f, notes = await search(cfg, speaker, args.name, scan=not args.no_scan, discover_fn=shared)
         if not f:
-            print("Fant ingen Lemus-høyttaler (" + "; ".join(notes) + "). Beholder adressen.")
+            print("Fant ingen SM450-høyttaler (" + "; ".join(notes) + "). Beholder adressen.")
             return None
         print(f"Fant {f.name} på {f.host}")
         cfg.data.update({"name": f.name, "udn": f.udn})

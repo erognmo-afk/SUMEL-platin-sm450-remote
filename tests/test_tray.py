@@ -37,7 +37,11 @@ class Version(unittest.TestCase):
         self.assertIn("SUMEL", out.getvalue())
 
     def test_version_number(self):
-        self.assertEqual(__version__, "0.10.0")
+        self.assertEqual(__version__, "0.10.1")
+        # «Om SUMEL» i appen viser samme versjon
+        from pathlib import Path
+        html = (Path(__file__).resolve().parents[1] / "lemus_remote" / "static" / "index.html").read_text(encoding="utf-8")
+        self.assertIn(f"<b>SUMEL</b> {__version__} ·", html)
 
 
 class Texts(unittest.TestCase):

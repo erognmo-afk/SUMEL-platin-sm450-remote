@@ -33,6 +33,8 @@ class FakeSM450:
         self.bands = {0: bytes.fromhex("07010a000100030002")}  # 9 byte uten lengdebyten
         self.received: list[bytes] = []
         self.silent = False
+        # False: lydprosessoren svarer ikke på båndlesing i standby (som den ekte SM450 ifølge databladet)
+        self.dsp_answers_in_standby = True
         # Demping i boks 0x3F. native_mute=False: høyttaleren svarer ikke på MUTE/UNMUTE-kommandoen
         # (for å teste reserven med volum 0). Spørringen besvares likevel.
         self.muted = False
@@ -116,6 +118,8 @@ class FakeSM450:
         elif key == (0x08, 0x05):
             self._broadcast(ev(0x08, 0x05, bytes([0x02, 0x04, self.preset, 0x01, 0x00, 0x00])))
         elif key == (0x08, 0x04):
+            if not self.power and not self.dsp_answers_in_standby:
+                return
             for ix, params in sorted(self.bands.items()):
                 self._broadcast(ev(0x08, 0x04, bytes([0x02, ix, 0x09]) + params))
         elif key == (0x08, 0x01):

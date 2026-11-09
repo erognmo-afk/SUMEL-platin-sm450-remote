@@ -42,6 +42,7 @@ MUTE_CONFIRM = 2.0  # sekunder vi venter på at boks 0x3F bekrefter demping fra 
 MUTE_RAMP_STEP = 5  # volum-reserve: skru opp igjen i steg på høyst så mye ...
 MUTE_RAMP_DELAY = 0.12  # ... med så mange sekunder mellom hvert steg
 FOLLOW_DELAY = 0.6  # vent litt etter en kommando fra en annen klient før vi leser på nytt
+WAKE_REFRESH_DELAYS = (2.0, 4.0, 6.0)  # etter vekking: les EQ og romkurve etter 2, 6 og 12 s (lydprosessoren trenger litt tid)
 # Lesekommandoer (class, opcode) – slike fra andre klienter trenger ingen oppfølging
 READ_OPS = {(0x02, 0x0D), (0x02, 0x01), (0x03, 0x05), (0x07, 0x02), (0x08, 0x05), (0x08, 0x04),
             (0x07, 0x09), (0x02, 0x89), (0x07, 0x0C)}
@@ -101,6 +102,7 @@ class Speaker:
             "preset": None,
             "play_state": None,
             "bands": [],
+            "bands_known": False,  # False til båndene faktisk er lest (i standby svarer ikke lydprosessoren)
             "versions": None,
             "name": name,
             "host": host,
@@ -138,6 +140,8 @@ class Speaker:
         self._burst: dict[int, bytes] | None = None
         self._burst_timer: asyncio.Task | None = None
         self._bands_version = 0
+        self._wake_task: asyncio.Task | None = None
+        self.wake_refresh_delays = WAKE_REFRESH_DELAYS
 
     # ------------------------------------------------------------ tilstand
 
@@ -146,6 +150,7 @@ class Speaker:
         return lambda: self._listeners.discard(callback)
 
     async def _apply(self, patch: dict) -> None:
+        old_power = self.state.get("power")
         if patch.get("power") is False and self.state.get("power") is True:
             self._source_before_standby = self.state.get("source")
         if ("volume" in patch and self.state.get("mute_mode") == "volume" and not self._ramping
@@ -157,6 +162,8 @@ class Speaker:
         if not changed:
             return
         self.state.update(changed)
+        if changed.get("power") is True and old_power is False:
+            self._schedule_wake_refresh()
         for cb in list(self._listeners):
             try:
                 cb(dict(self.state))
@@ -190,6 +197,8 @@ class Speaker:
             self._tasks.append(asyncio.create_task(self._luci_loop()))
 
     async def stop(self) -> None:
+        if self._wake_task:
+            self._wake_task.cancel()
         for t in self._tasks:
             t.cancel()
         for t in self._tasks:
@@ -324,15 +333,38 @@ class Speaker:
                 info.pop("b2", None)
                 bands.append({"ix": ix, "editable": info["type_code"] in self.formulas and ix <= MAX_BAND_INDEX, **info})
         self._bands_version += 1
-        await self._apply({"bands": bands, "bands_version": self._bands_version})
+        await self._apply({"bands": bands, "bands_version": self._bands_version, "bands_known": True})
 
     async def refresh_bands(self, timeout: float = 2.5) -> None:
-        """Les alle bånd på nytt. En tom liste gir ikke noe svar, så stillhet betyr ingen bånd."""
+        """Les alle bånd på nytt. En tom liste gir ikke noe svar, så stillhet betyr ingen bånd,
+        men bare når høyttaleren er på: i standby svarer ikke lydprosessoren, og da beholdes
+        det vi visste (eller båndene står som ukjente, ``bands_known`` False)."""
         before = self._bands_version
         await self._send_control(p.get_filters(0))
         if not await self._wait_for(lambda s: self._bands_version != before, timeout):
-            if self._burst is None:
+            if self._burst is None and self.state.get("power") is True:
                 await self._publish_bands({})
+
+    def _schedule_wake_refresh(self) -> None:
+        if self._wake_task and not self._wake_task.done():
+            self._wake_task.cancel()
+        self._wake_task = asyncio.create_task(self._wake_refresh())
+
+    async def _wake_refresh(self) -> None:
+        """Høyttaleren våknet fra standby: les EQ, romkorreksjon og romkurve på nytt noen ganger,
+        siden lydprosessoren kan bruke noen sekunder på å bli klar."""
+        for delay in self.wake_refresh_delays:
+            await asyncio.sleep(delay)
+            if self.state.get("power") is not True or not self.state.get("connected"):
+                return
+            try:
+                async with self._cmd_lock:
+                    for frame in (p.GET_MANUAL_EQ, p.GET_ROOM_CORRECTION, p.GET_ROOM_CURVE):
+                        await self._send_control(frame)
+                        await asyncio.sleep(0.2)
+                    await self.refresh_bands()
+            except (CommandError, OSError):
+                return
 
     async def _quiet_refresh(self) -> None:
         try:
@@ -474,9 +506,12 @@ class Speaker:
             if not await self._refresh_until(lambda: (b := self._band(ix)) is not None and b["enabled"] is enabled):
                 raise CommandError("høyttaleren bekreftet ikke av/på for båndet")
 
-    async def apply_bands(self, target: list[dict]) -> None:
+    async def apply_bands(self, target: list[dict], keep_types: set[int] | frozenset[int] | None = None) -> None:
         """Sett alle skrivbare bånd til en profil: endre eksisterende i rekkefølge, slett de
-        som er til overs og lag nye ved behov. Bånd av typer vi ikke kan skrive, røres ikke."""
+        som er til overs og lag nye ved behov. Bånd av typer vi ikke kan skrive, røres ikke.
+
+        Med ``keep_types`` (typene profilen kan bruke) beholdes skrivbare bånd av andre typer, for
+        eksempel et høypassfilter, på sin plass, og profilens bånd fyller de andre plassene."""
         norm = []
         for t in target:
             code = int(t.get("type", filters.PARAMETRIC))
@@ -488,6 +523,11 @@ class Speaker:
         if len(norm) > p.MAX_BANDS:
             raise CommandError(f"profilen har {len(norm)} bånd, men SM450 tar høyst {p.MAX_BANDS}")
         await self.refresh_bands()
+        if not self.state.get("bands_known"):
+            raise CommandError("EQ-en i høyttaleren er ikke lest ennå (står den i standby?). Prøv igjen om litt.")
+        if keep_types is not None and not any(n[0] not in keep_types for n in norm):
+            await self._apply_keeping(norm, set(keep_types))
+            return
         if len(self.state["bands"]) - len([b for b in self.state["bands"] if b["editable"]]) + len(norm) > p.MAX_BANDS:
             raise CommandError(f"profilen og båndene som ikke kan skrives blir til sammen mer enn {p.MAX_BANDS} bånd")
         existing = [b for b in self.state["bands"] if b["editable"]]
@@ -503,8 +543,31 @@ class Speaker:
             if not en:
                 await self.write_band(ix, code, freq, q, gain, False)
 
+    async def _apply_keeping(self, norm: list[tuple], keep_types: set[int]) -> None:
+        """Del av apply_bands: skrivbare bånd med typer utenfor ``keep_types`` blir stående."""
+        bands = sorted(self.state["bands"], key=lambda b: b["ix"])
+        kept = [b for b in bands if not b["editable"] or b["type_code"] not in keep_types]
+        if len(kept) + len(norm) > p.MAX_BANDS:
+            raise CommandError(f"profilen og filtrene som beholdes blir til sammen mer enn {p.MAX_BANDS} bånd")
+        rest = list(norm)
+        for b in bands:
+            if not b["editable"] or b["type_code"] not in keep_types:
+                continue
+            if rest:
+                code, freq, q, gain, en = rest.pop(0)
+                qn = (q or 0.71) if code in filters.HAS_Q else None
+                gn = (gain if gain is not None else 0.0) if code in filters.HAS_GAIN else None
+                if not self._same(b, code, freq, qn, gn, en):
+                    await self.write_band(b["ix"], code, freq, q, gain, en)
+            else:
+                await self.delete_band(b["ix"])
+        for code, freq, q, gain, en in rest:
+            ix = await self.write_band(None, code, freq, q, gain)
+            if not en:
+                await self.write_band(ix, code, freq, q, gain, False)
+
     async def read_room_curve(self) -> list[int] | None:
-        """Les romkalibreringskurven (07 09 -> 07 0a, 143 byte). Formatet er ikke dekodet."""
+        """Les romkurven (07 09 -> 07 0a, 140 byte data). Se protocol.decode_room_curve."""
         before = self.state.get("room_curve_time")
         await self._send_control(p.GET_ROOM_CURVE)
         await self._wait_for(lambda s: s.get("room_curve_time") != before, 4)

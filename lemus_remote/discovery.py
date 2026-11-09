@@ -88,7 +88,7 @@ def parse_description(xml: str) -> dict[str, str] | None:
     model_desc = _tag(xml, "modelDescription")
     if "librewireless" not in manufacturer.lower() and "libresync" not in model_desc.lower():
         return None
-    return {"name": _tag(xml, "friendlyName") or "Lemus", "udn": _tag(xml, "UDN")}
+    return {"name": _tag(xml, "friendlyName") or "SM450", "udn": _tag(xml, "UDN")}
 
 
 def _ssdp_search(timeout: float, target: tuple[str, int], hints: tuple[str, ...] = ()) -> list[tuple[str, bytes]]:

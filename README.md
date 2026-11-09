@@ -25,6 +25,31 @@ SUMEL is "LEMUS" spelled backwards. It is a hobby project: one speaker, one home
 - A **web app** served by that backend. Open it in a browser on the PC, or on a phone on the same network (it can be added to the home screen as an app).
 - **No cloud, no account, no telemetry.** Everything stays on your network.
 
+## Getting started
+
+**Before you install**
+
+1. **Set up the speaker with the manufacturer's app first** (for example the Platin app, the Lemus app or Google Home) and check that you can play music to it. SUMEL cannot put a speaker on Wi-Fi.
+2. **Same network.** The PC must be on the same home network as the speaker: not a guest network, and not one with Wi-Fi client isolation.
+3. **Note the speaker's IP address** in case the automatic search fails. You find it in your router's list of connected devices or in the manufacturer's app. Tip: reserve a fixed address for the speaker in the router.
+4. **Room correction is measured in the Platin app** (Room EQ). SUMEL can switch it on and off and show the stored curve, but cannot make a new measurement.
+
+**What happens on first start**
+
+1. Your browser opens SUMEL, and a SUMEL icon appears next to the clock (it may be hidden under **^**).
+2. SUMEL searches your network. It only checks which devices answer; no commands are sent, and the volume is never changed on its own.
+3. When the speaker is found, its name shows on the front panel and the address is saved for next time.
+4. If it is still searching after about 20 seconds, press **Enter IP address** (or go to **More → Connection**), type the speaker's address and press **Use address**.
+5. If the speaker is in standby, SUMEL reads the EQ and the room curve as soon as it wakes up. Until then, EQ changes are blocked so nothing is overwritten by mistake.
+
+**Profiles and EQ.** The speaker has three slots for your own EQ filters. Applying a profile or a curve replaces those filters. A high-pass filter is kept, and SUMEL asks first if the filters in the speaker don't come from one of its profiles. **Undo** brings the previous filters back.
+
+**Other speakers than the Lemus HOME 1500.** SUMEL does not check the model yet; it connects to the first LibreSync device that answers and every control is available. Try volume and input first, and please [tell us](#compatibility) how it went before you use EQ.
+
+**Access code.** A 6-digit code is created on first start. You don't need it on the PC itself. A phone enters it once, or scans the QR code under **More → Use on iPhone** (works on Android too). The code is also in the tray menu.
+
+**Settings** are stored in `%APPDATA%\LemusRemote\config.json` on Windows (`~/.config/lemus-remote/config.json` elsewhere). The Windows program also writes a log, `lemus.log`, in the same folder. If you attach the log to an issue, remove the line with the access code first.
+
 ## Features
 
 Status is for the tested Lemus HOME 1500. "Confirmed" means it was tried on the real speaker and the speaker reported the new value back.
@@ -165,7 +190,7 @@ SUMEL looks for devices that describe themselves as **Libre Wireless / LibreSync
 | Newer Platin modules (for example SM455) or Libre LS10-based devices | Unknown. LS10 is reported (by a third party) to wrap port 7777 in TLS, so volume and transport would likely not work |
 | Platin Stereo Hub | Same LibreSync protocol family, but the SM450 differs in several places (source codes, frame formats, EQ). Not tested or supported; see [aiolibresync](https://github.com/drsound/aiolibresync) |
 
-**Have a different model?** Please open an issue with the model name, the firmware versions (shown under **More → Speaker**) and what worked or didn't. Note: SUMEL does not check the model yet. Every control, including EQ and profiles, is available as soon as it connects, and applying a profile replaces the filters in the three app EQ slots (Undo can bring them back). On another model, try volume and input first.
+**Have a different model?** Please open an issue with the model name, the firmware versions (shown under **More → Speaker**) and what worked or didn't. Note: SUMEL does not check the model yet. Every control, including EQ and profiles, is available as soon as it connects. On another model, try volume and input first.
 
 ## How it works
 
@@ -225,3 +250,5 @@ SUMEL er en uoffisiell fjernkontroll for høyttalere med Platin SM450, laget for
 SUMEL er ikke laget av eller tilknyttet Lemus eller Platin. Den skriver til DSP-en, så bruk den på egen risiko. Den er bare testet på Lemus HOME 1500. Programmet tar høyst tre EQ-bånd: et fjerde bånd ga et smell i testen og overskrev trolig produsentens tuning (ifølge SM450 datasheet v1.3 er bare tre filtre satt av til appens EQ).
 
 **Installere:** Last ned `SUMEL-Setup-….exe` fra [siste release](https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/latest) (krever ingen GitHub-konto), og kjør den. Programmet er ikke signert: ved «Windows beskyttet PC-en» trykker du **Mer info → Kjør likevel**. Er Smart App Control på, blokkeres det helt; bruk da Python-varianten: installer Python 3.10 eller nyere og kjør `py -m lemus_remote --open` i mappen (eventuelt med `--host <ip>`). SUMEL ligger som et ikon ved klokken, der du også finner adressen og tilgangskoden for mobilen. Appen er på engelsk som standard, men blir norsk når nettleseren eller Windows er på norsk. Du kan bytte når som helst under **Mer → Språk / Language**.
+
+**Første gang:** Sett opp høyttaleren med produsentens app (eller Google Home) først, og la PC-en være på samme nett (ikke gjestenettet). SUMEL leter selv. Finner den ikke høyttaleren etter ca. 20 sekunder, trykker du **Skriv IP-adresse** og skriver inn adressen fra ruteren. Står høyttaleren i standby, leses EQ-en når den våkner. En profil erstatter de tre EQ-filtrene i høyttaleren, men beholder et høypassfilter og spør først hvis filtrene ikke kommer fra en profil. Andre modeller enn Lemus HOME 1500 er ikke testet: prøv volum og inngang før du bruker EQ.

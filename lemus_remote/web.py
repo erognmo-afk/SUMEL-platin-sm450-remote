@@ -174,7 +174,8 @@ class WebServer:
         st = dict(self.speaker.state)
         # Romkurven fra Platin-appen, dekodet (målt + etter korreksjon). Rådataene beholdes også.
         raw = st.get("room_curve_raw")
-        st["room_curve"] = p.decode_room_curve(bytes(raw)) if raw else None
+        st["room_curve_empty"] = bool(raw) and p.room_curve_is_empty(bytes(raw))
+        st["room_curve"] = p.decode_room_curve(bytes(raw)) if raw and not st["room_curve_empty"] else None
         if self.config is not None:
             st["settings"] = {"host": self.config["host"], "auto": not self.config["host"],
                               "max_volume_step": self.speaker.max_volume_step,
@@ -317,7 +318,8 @@ class WebServer:
                     prof = self.profiles.get(str(data["id"])) if "id" in data else {"bands": data.get("bands", [])}
                     if not prof:
                         raise ValueError("fant ikke profilen")
-                    await s.apply_bands(validate_bands(prof["bands"]))
+                    # Høypass og andre filtre profilen ikke bruker, blir stående (som i kurve-EQ)
+                    await s.apply_bands(validate_bands(prof["bands"]), keep_types=frozenset(eqfit.FIT_TYPES))
                     if prof.get("room_correction") is not None and prof["room_correction"] != s.state["room_correction"]:
                         await s.set_room_correction(bool(prof["room_correction"]))
                     if prof.get("manual_eq") is not None and prof["manual_eq"] != s.state["manual_eq"]:

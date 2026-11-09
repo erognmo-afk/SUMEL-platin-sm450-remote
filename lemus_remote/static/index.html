@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>
-/* frontplate-utseende settes før første tegning (ingen blink): «plain» = uten aluminiumslist (standard), «alu» = med */
+/* frontplate-utseende settes før første tegning (ingen blink): «alu» = med aluminiumslist (standard), «plain» = uten */
 (function () { var f = "alu"; try { if (localStorage.getItem("lemus_front") === "plain") f = "plain"; } catch (e) { /* privat modus */ } document.documentElement.setAttribute("data-front", f); })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -564,6 +564,8 @@ details.expert > .two { margin-top:10px; }
 .expert-sep::before, .expert-sep::after { content:""; flex:1; height:1px; background:var(--line-2); }
 
 /* toast */
+.ask-box { position:fixed; z-index:45; left:50%; transform:translateX(-50%); bottom:calc(84px + var(--safe-b)); width:min(520px, calc(100% - 32px));
+  background:linear-gradient(180deg, #33312d, #2a2825); color:var(--fg); box-shadow:0 14px 40px rgba(0,0,0,.55); font-size:14px; }
 #toasts { position:fixed; z-index:40; left:50%; transform:translateX(-50%); bottom:calc(84px + var(--safe-b)); width:min(440px, calc(100% - 32px));
   display:flex; flex-direction:column; gap:8px; pointer-events:none; }
 .toast { pointer-events:none; display:flex; align-items:center; gap:12px; padding:8px 8px 8px 14px; min-height:48px; border-radius:14px; font-size:14px;
@@ -809,7 +811,7 @@ html[data-front="alu"] .fp-body { padding-top:22px; }
     <div class="fp-inner">
       <div class="fp-head">
         <span class="fp-mark" aria-hidden="true">Sumel</span>
-        <span class="fp-model" id="fpModel">Lemus Home 1500 · Platin SM450</span>
+        <span class="fp-model" id="fpModel">Platin SM450</span>
         <div class="fp-lamps" aria-hidden="true">
           <span data-i18n="lamp.power"><i class="lamp" id="lmPower"></i>Strøm</span>
           <span data-i18n="lamp.net"><i class="lamp" id="lmNet"></i>Nett</span>
@@ -1011,7 +1013,7 @@ html[data-front="alu"] .fp-body { padding-top:22px; }
     </div>
     <div class="card" id="roomData">
       <h2 data-i18n="room.data">Målingen</h2>
-      <p class="small muted" data-i18n="room.dataLead">SUMEL leser målingen fra høyttaleren når du trykker på knappen.</p>
+      <p class="small muted" data-i18n="room.dataLead">SUMEL leser målingen når den kobler til høyttaleren. Knappen leser den på nytt.</p>
       <div class="row"><button class="btn" id="roomRead" data-need="online" data-i18n="room.read">Les målingen på nytt</button><span class="saving" id="roomReadState"></span></div>
       <details class="raw" id="sparkDetails" style="margin-top:14px" hidden>
         <summary class="small muted" data-i18n="room.rawShow">Vis rådata</summary>
@@ -1163,7 +1165,7 @@ html[data-front="alu"] .fp-body { padding-top:22px; }
       </div>
     </div>
   </details>
-  <p class="small muted" id="aboutLine" style="margin:22px 4px 8px;opacity:.75"><b>SUMEL</b> 0.10.0 · <span data-i18n="about.tag">fjernkontroll for Platin SM450</span><br><i data-i18n="about.why">Utviklet grunnet irritasjon på dårlige eller ikke-eksisterende apper. =)</i></p>
+  <p class="small muted" id="aboutLine" style="margin:22px 4px 8px;opacity:.75"><b>SUMEL</b> 0.10.1 · <span data-i18n="about.tag">fjernkontroll for Platin SM450</span><br><i data-i18n="about.why">Utviklet grunnet irritasjon på dårlige eller ikke-eksisterende apper. =)</i></p>
 </section>
 </main>
 <div id="toasts" aria-live="polite"></div>
@@ -1184,7 +1186,7 @@ const I18N = {
     "banner.lostPc": "PC-en svarer ikke", "banner.lostPcText": "Sjekk at PC-en er på og våken, og at du er på samme nettverk. Prøver igjen automatisk.",
     "banner.retry": "Prøv igjen", "banner.help": "Hva kan jeg sjekke?", "banner.find": "Finn høyttaleren",
     "banner.reconnecting": "Kobler til på nytt …",
-    "banner.searching": "Leter etter høyttaleren", "banner.searchingText": "Søker på hjemmenettet. Kontrollene er låst til den er funnet.",
+    "banner.searching": "Leter etter høyttaleren", "banner.searchingText": "Søker på hjemmenettet. Kontrollene er låst til den er funnet.", "banner.searchingLong": "Fant den ikke ennå. Skriv inn høyttalerens IP-adresse, eller sjekk at den har strøm og er på samme nett som PC-en (ikke gjestenettet).", "banner.enterIp": "Skriv IP-adresse", "banner.noPower": "Høyttaleren svarer ikke som ventet", "banner.noPowerText": "Den er funnet, men melder ikke om den er på. Er det en høyttaler med Platin SM450? Prøv å slå den av og på.",
     "banner.noSpeaker": "Ingen kontakt med høyttaleren", "banner.noSpeakerText": "Sjekk at den har strøm og er på samme nett. Prøver igjen automatisk.",
     "banner.settings": "Innstillinger", "banner.waking": "Vekker høyttaleren …", "banner.wakingText": "Dette tar 5–8 sekunder.",
     "banner.standby": "Høyttaleren står i standby", "banner.standbyText": "Slå på for å bruke kontrollene.",
@@ -1201,13 +1203,13 @@ const I18N = {
     "toast.powerOn": "Høyttaleren er på", "toast.powerOff": "Høyttaleren står i standby",
     "src.none": "Ingen innganger lest ennå",
     "sw.on": "På", "sw.off": "Av", "sw.toast": v => `${v.label} ${v.on ? "på" : "av"}`,
-    "room.smallOn": "Bruker målingen som er lagret i høyttaleren", "room.smallOff": "Av. Målingen er fortsatt lagret i høyttaleren",
+    "room.smallOn": "Bruker målingen som er lagret i høyttaleren", "room.smallOff": "Av. Målingen er fortsatt lagret i høyttaleren", "room.smallNone": "Ingen måling i høyttaleren ennå (mål i Platin-appen)",
     "type.fallback": "Type {code}",
     "save.saving": "Lagrer i høyttaleren …", "save.failed": "Ikke lagret", "save.ok": "Lagret og bekreftet",
     "toast.undone": "Angret", "toast.maxBands": "SM450 tar høyst {n} EQ-punkter. Slett ett først.", "toast.pointAdded": "Punkt lagt til",
     "toast.pointDeleted": "Punkt {n} slettet", "toast.bandsRead": "Båndene er lest på nytt",
     "eq.eqOffTag": "Egen EQ er av", "room.legendOff": "Egen EQ er av – kurven er flat",
-    "room.notRead": "Målingen er ikke lest fra høyttaleren ennå.", "room.tagOn": "Korreksjon på", "room.tagOff": "Korreksjon av",
+    "room.notRead": "Målingen er ikke lest fra høyttaleren ennå.", "room.noMeasurement": "Ingen måling funnet i høyttaleren. Romkorreksjonen måles i Platin-appen (Room EQ).", "room.unknownFormat": "Høyttaleren svarte, men målingen har et ukjent format ({n} byte).", "room.tagOn": "Korreksjon på", "room.tagOff": "Korreksjon av",
     "room.limitLbl": "≈ 550 Hz",
     "bl.empty": "Ingen EQ-punkter. Legg til med «Punkt» eller dobbeltklikk i grafen (høyst {max}).",
     "bl.aria": "Punkt {n}: {desc}", "bl.ro": ", kan ikke endres ennå", "bl.count": "{n} av {max}",
@@ -1267,7 +1269,7 @@ const I18N = {
     "roomread.reading": "Leser …", "roomread.done": "Lest", "roomread.none": "Ingen data mottatt", "spark.meta": "{n} verdier · {mn}–{mx}",
     "feat.manual_eq": "Egen EQ", "feat.room_correction": "Romkorreksjon", "feat.volume": "Volum", "feat.transport": "Avspilling",
     "feat.eq_bands": "EQ-punkter", "feat.power": "Strøm", "feat.source": "Inngang",
-    "info.name": "Navn", "info.amp": "Forsterker", "info.address": "Adresse", "info.firmware": "Fastvare", "info.verified": "Bekreftet",
+    "info.name": "Navn", "info.amp": "Forsterker", "info.address": "Adresse", "info.firmware": "Fastvare", "info.verified": "Testet på Lemus HOME 1500", "eq.notRead": "EQ-en i høyttaleren er ikke lest ennå (den våkner kanskje fra standby). Prøv igjen om noen sekunder.", "prof.confirmReplace": v => `«${v.name}» erstatter ${v.n === 1 ? "filteret" : `de ${v.n} filtrene`} som ligger i høyttaleren nå. Du kan angre etterpå.`,
     "host.auto": "Finner høyttaleren automatisk{now}.", "host.autoNow": " (nå {host})", "host.fixed": "Fast adresse {host}.",
     "types.level": "nivå", "types.freqOnly": "bare frekvens", "types.learned": "Skrivbar · lært", "types.writable": "Skrivbar", "types.learnedTip": "Formelen er lært fra Platin-appen og kontrollert mot høyttaleren (bit for bit).", "types.notYet": "Ikke ennå",
     "types.onOff": "Av/på per punkt", "types.builtin": "innebygd (08 06)",
@@ -1346,7 +1348,7 @@ const I18N = {
     "room.lgMeasured": "Measured in the room", "room.lgResult": "After room correction", "room.lgEq": "Custom EQ (on top)",
     "room.respNote": "Room correction only works below about 550 Hz. The speaker only stores the measurement below that, so the curves are flat above 550 Hz (that doesn’t mean the room is flat there). The peaks aren’t smoothed, so they may look higher.",
     "room.data": "The measurement",
-    "room.dataLead": "SUMEL reads the measurement from the speaker when you press the button.",
+    "room.dataLead": "SUMEL reads the measurement when it connects to the speaker. The button reads it again.",
     "room.read": "Read the measurement again", "room.rawShow": "Show raw data", "room.raw": "raw data from the speaker",
     "prof.lead": "Profiles are stored in the app on the PC and shared by the PC and iPhone. The speaker only remembers the settings that are active now.",
     "prof.builtin": "Presets", "prof.mine": "My profiles", "prof.mineRight": "stored in the app",
@@ -1389,7 +1391,7 @@ const I18N = {
     "banner.lostPc": "The PC isn’t responding", "banner.lostPcText": "Check that the PC is on and awake, and that you’re on the same network. Retrying automatically.",
     "banner.retry": "Try again", "banner.help": "What can I check?", "banner.find": "Find the speaker",
     "banner.reconnecting": "Reconnecting …",
-    "banner.searching": "Searching for the speaker", "banner.searchingText": "Searching the home network. The controls are locked until it’s found.",
+    "banner.searching": "Searching for the speaker", "banner.searchingText": "Searching the home network. The controls are locked until it’s found.", "banner.searchingLong": "Not found yet. Enter the speaker’s IP address, or check that it has power and is on the same network as this PC (not a guest network).", "banner.enterIp": "Enter IP address", "banner.noPower": "The speaker isn’t answering as expected", "banner.noPowerText": "It was found but doesn’t report whether it’s on. Is it a speaker with a Platin SM450? Try switching it off and on.",
     "banner.noSpeaker": "No contact with the speaker", "banner.noSpeakerText": "Check that it’s powered and on the same network. Retrying automatically.",
     "banner.settings": "Settings", "banner.waking": "Waking the speaker …", "banner.wakingText": "This takes 5–8 seconds.",
     "banner.standby": "The speaker is in standby", "banner.standbyText": "Switch it on to use the controls.",
@@ -1406,13 +1408,13 @@ const I18N = {
     "toast.powerOn": "The speaker is on", "toast.powerOff": "The speaker is in standby",
     "src.none": "No inputs read yet",
     "sw.on": "On", "sw.off": "Off", "sw.toast": v => `${v.label} ${v.on ? "on" : "off"}`,
-    "room.smallOn": "Uses the measurement stored in the speaker", "room.smallOff": "Off. The measurement is still stored in the speaker",
+    "room.smallOn": "Uses the measurement stored in the speaker", "room.smallOff": "Off. The measurement is still stored in the speaker", "room.smallNone": "No measurement in the speaker yet (measure in the Platin app)",
     "type.fallback": "Type {code}",
     "save.saving": "Saving to the speaker …", "save.failed": "Not saved", "save.ok": "Saved and confirmed",
     "toast.undone": "Undone", "toast.maxBands": "The SM450 takes at most {n} EQ points. Delete one first.", "toast.pointAdded": "Point added",
     "toast.pointDeleted": "Point {n} deleted", "toast.bandsRead": "Bands reloaded",
     "eq.eqOffTag": "Custom EQ is off", "room.legendOff": "Custom EQ is off – the curve is flat",
-    "room.notRead": "The measurement hasn’t been read from the speaker yet.", "room.tagOn": "Correction on", "room.tagOff": "Correction off",
+    "room.notRead": "The measurement hasn’t been read from the speaker yet.", "room.noMeasurement": "No measurement found in the speaker. Room correction is measured in the Platin app (Room EQ).", "room.unknownFormat": "The speaker answered, but the measurement has an unknown format ({n} bytes).", "room.tagOn": "Correction on", "room.tagOff": "Correction off",
     "room.limitLbl": "≈ 550 Hz",
     "bl.empty": "No EQ points. Add one with “Point” or double-click in the graph (max {max}).",
     "bl.aria": "Point {n}: {desc}", "bl.ro": ", can’t be changed yet", "bl.count": "{n} of {max}",
@@ -1457,7 +1459,7 @@ const I18N = {
     "roomread.reading": "Reading …", "roomread.done": "Read", "roomread.none": "No data received", "spark.meta": "{n} values · {mn}–{mx}",
     "feat.manual_eq": "Custom EQ", "feat.room_correction": "Room correction", "feat.volume": "Volume", "feat.transport": "Playback",
     "feat.eq_bands": "EQ points", "feat.power": "Power", "feat.source": "Input",
-    "info.name": "Name", "info.amp": "Amplifier", "info.address": "Address", "info.firmware": "Firmware", "info.verified": "Confirmed",
+    "info.name": "Name", "info.amp": "Amplifier", "info.address": "Address", "info.firmware": "Firmware", "info.verified": "Tested on Lemus HOME 1500", "eq.notRead": "The speaker’s EQ hasn’t been read yet (it may be waking from standby). Try again in a few seconds.", "prof.confirmReplace": v => `“${v.name}” replaces the ${v.n === 1 ? "filter" : `${v.n} filters`} in the speaker now. You can undo afterwards.`,
     "host.auto": "Finds the speaker automatically{now}.", "host.autoNow": " (now {host})", "host.fixed": "Fixed address {host}.",
     "types.level": "level", "types.freqOnly": "frequency only", "types.learned": "Writable · learned", "types.writable": "Writable", "types.learnedTip": "The formula was learned from the Platin app and checked against the speaker (bit for bit).", "types.notYet": "Not yet",
     "types.onOff": "On/off per point", "types.builtin": "built in (08 06)",
@@ -2185,7 +2187,7 @@ function renderToggles() {
   setTog($("#togEq"), S.manual_eq, togBusy.manual_eq);
   $("#abOff").setAttribute("aria-pressed", String(S.manual_eq === false));
   $("#abOn").setAttribute("aria-pressed", String(S.manual_eq === true));
-  $("#roomSmall").textContent = S.room_correction ? t("room.smallOn") : t("room.smallOff");
+  $("#roomSmall").textContent = S.room_curve_empty ? t("room.smallNone") : S.room_correction ? t("room.smallOn") : t("room.smallOff");
 }
 
 /* ============================================================ EQ maths (RBJ cookbook, bare for visning) */
@@ -2607,7 +2609,8 @@ function drawRoom() {
   if (!rc) {
     // ikke lest ennå: bare egen EQ, dempet bak teksten (ingen lesing skjer av seg selv)
     g.globalAlpha = .45; strokeCurve(g, sumCurve(G, eq, 2), "#f7c88a", 1.6, null); g.globalAlpha = 1;
-    const et = $("#roomEmptyText"), msg = t("room.notRead"); if (et.textContent !== msg) et.textContent = msg;
+    const msg = S && S.room_curve_empty ? t("room.noMeasurement") : S && S.room_curve_raw ? t("room.unknownFormat", { n: S.room_curve_raw.length }) : t("room.notRead");
+    const et = $("#roomEmptyText"); if (et.textContent !== msg) et.textContent = msg;
     return;
   }
   // over ca. 550 Hz: ingen romkorreksjon (svakt skravert felt og en stiplet grense)
@@ -3286,6 +3289,7 @@ const keptList = kept => (kept || []).map(k => `${typeLabel(k.type)} ${fmtHz(k.f
 /* «Bruk»: skriv filtrene (høyst tre) med bands_apply. Finnes det punkter fra før, spør først. */
 async function applyCurve(confirmed) {
   if (!awake() || curveApplying) return;
+  if (S.bands_known === false) { toast(t("eq.notRead"), { err: true, key: "eq" }); return; }
   const f = await ensureFit();
   if (!f) { toast(fitErrMsg || t("curve.failed"), { err: true, key: "eq" }); return; }
   const editable = ((S && S.bands) || []).filter(isEditable).sort((a, b) => a.ix - b.ix);
@@ -3394,9 +3398,14 @@ cvCurve.addEventListener("keydown", ev => {
 
 /* ============================================================ profiles */
 const profBands = p => (p.bands || []).map((b, i) => ({ ix: i, type_code: b.type ?? 7, freq: b.freq, q: b.q, gain: b.gain, enabled: b.enabled !== false, editable: true }));
-function profileMatches(p) {
+// En profil med bare parametriske og shelving-filtre lar høypass o.l. stå (som kurve-EQ); en profil som selv
+// har andre typer (lagret fra Punkter) erstatter alle skrivbare bånd.
+const profFull = p => (p.bands || []).some(b => !FIT_TYPES.includes(b.type ?? 7));
+const profTouches = (p, b) => isEditable(b) && (profFull(p) || FIT_TYPES.includes(b.type_code));
+function bandsMatchProfile(p) {
   if (!S || !S.bands) return false;
-  const dev = S.bands.filter(b => b.editable), pb = p.bands || [];
+  const full = profFull(p);
+  const dev = S.bands.filter(b => b.editable && (full || FIT_TYPES.includes(b.type_code))), pb = p.bands || [];
   if (dev.length !== pb.length) return false;
   for (let i = 0; i < pb.length; i++) {
     const a = dev[i], b = pb[i];
@@ -3405,6 +3414,10 @@ function profileMatches(p) {
     if (b.q != null && a.q != null && Math.abs(a.q - b.q) > 0.015) return false;
     if ((a.enabled !== false) !== (b.enabled !== false)) return false;
   }
+  return true;
+}
+function profileMatches(p) {
+  if (!bandsMatchProfile(p)) return false;
   if (p.room_correction != null && p.room_correction !== S.room_correction) return false;
   // Egen EQ av: profilen står fortsatt i høyttaleren og vises som aktiv, men «(EQ av)» (se eqOffShown)
   if (p.manual_eq != null && p.manual_eq !== S.manual_eq && S.manual_eq !== false) return false;
@@ -3420,6 +3433,17 @@ async function loadProfiles() {
 async function applyProfile(id) {
   if (!awake() || profBusy) return;
   const p = PROFILES.find(x => x.id === id); if (!p) return;
+  if (S.bands_known === false) { toast(t("eq.notRead"), { err: true, key: "profile" }); return; }
+  // Filtre som ikke kommer fra en profil (laget i Punkter, Kurve eller av produsenten): spør før de erstattes
+  const replaced = (S.bands || []).filter(b => profTouches(p, b));
+  if (replaced.length && !PROFILES.some(bandsMatchProfile)) {
+    profBusy = id; renderProfiles(true);
+    const kept = (S.bands || []).filter(b => isEditable(b) && !profTouches(p, b));
+    const ok = await askConfirm(t("prof.confirmReplace", { n: replaced.length, name: profName(p) })
+      + (kept.length ? t("curve.keptNote", { n: kept.length, list: keptList(kept.map(b => ({ type: b.type_code, freq: b.freq }))) }) : ""), t("curve.replace"));
+    profBusy = null; renderProfiles(true);
+    if (!ok || !awake()) return;
+  }
   snapshot();
   const eqWasOff = S.manual_eq === false;
   profBusy = id; renderProfiles(true);
@@ -3706,9 +3730,9 @@ function renderMore() {
   if (sig === moreSig) return; moreSig = sig;
   const rows = [[t("info.name"), S.name], [t("info.amp"), "Platin SM450"], [t("info.address"), S.host || "–"],
     [t("info.firmware"), [v.mcu && "MCU " + v.mcu, v.ls9 && "LS9 " + v.ls9, v.cast && "Cast " + v.cast].filter(Boolean).join(" · ") || "–"],
-    [t("info.verified"), (S.verified || []).map(f => FEATURE_KEYS.includes(f) ? t("feat." + f) : f).join(", ") || "–"]];
+    [t("info.verified"), S.connected ? (S.verified || []).map(f => FEATURE_KEYS.includes(f) ? t("feat." + f) : f).join(", ") || "–" : "–"]];
   $("#info").innerHTML = rows.map(([k, x]) => `<dt>${esc(k)}</dt><dd>${esc(x || "–")}</dd>`).join("");
-  $("#fpModel").textContent = String(S.name || "Lemus Home 1500") + " · Platin SM450";
+  $("#fpModel").textContent = !S.name ? "Platin SM450" : /SM\s?450/i.test(S.name) ? String(S.name) : String(S.name) + " · Platin SM450";
   const lan = st.lan_url || location.origin;
   const url = st.access_code ? `${lan}/?key=${st.access_code}` : lan;
   $("#lanUrl").textContent = url;
@@ -3767,7 +3791,7 @@ async function startFind(fromBanner) {
   try {
     const eo = {};
     const j = await api("/api/settings", { host: "" }, { key: "settings", silent: true, errOut: eo });
-    if (j && j.found) { findState = { k: "found", name: j.found.name || "Lemus", host: j.found.host }; toast(t("toast.foundAt", { name: j.found.name || "Lemus", host: j.found.host }), { key: "settings" }); }
+    if (j && j.found) { findState = { k: "found", name: j.found.name || "SM450", host: j.found.host }; toast(t("toast.foundAt", { name: j.found.name || "SM450", host: j.found.host }), { key: "settings" }); }
     else findState = { k: "err", raw: eo.raw, status: eo.status, msg: eo.msg };
   } finally {
     btn.removeAttribute("aria-busy"); btn.dataset.i18n = "more.findAuto"; setI18nText(btn, t("more.findAuto"));
@@ -3826,6 +3850,34 @@ $("#diagBtn").onclick = async () => {
 /* ============================================================ status & banner */
 const setText = (el, t) => { if (el.textContent !== t) el.textContent = t; };
 const setCls = (el, c) => { if (el.className !== c) el.className = c; };
+/* Liten bekreftelse nederst på skjermen. Gir true (ja) eller false (avbryt / Esc). */
+function askConfirm(text, yesLabel) {
+  return new Promise(resolve => {
+    const old = document.getElementById("askBox"); if (old) old.remove();
+    const box = document.createElement("div");
+    box.id = "askBox"; box.className = "note warn ask-box"; box.setAttribute("role", "alertdialog");
+    box.innerHTML = '<span></span><div class="row" style="margin-top:10px"><button type="button" class="btn sm alu"></button><button type="button" class="btn sm ghost"></button></div>';
+    box.querySelector("span").textContent = text;
+    const [yes, no] = box.querySelectorAll("button");
+    yes.textContent = yesLabel; no.textContent = t("common.cancel");
+    const onKey = e => { if (e.key === "Escape") { e.preventDefault(); done(false); } };
+    const done = v => { document.removeEventListener("keydown", onKey, true); box.remove(); resolve(v); };
+    yes.onclick = () => done(true); no.onclick = () => done(false);
+    document.addEventListener("keydown", onKey, true);
+    document.body.appendChild(box); yes.focus();
+  });
+}
+/* Tilstander som varer lenge («Leter …», ingen strømstatus): etter en stund vises hjelp og en knapp. */
+const SLOW_SEARCH_MS = 20000, SLOW_POWER_MS = 15000, slowSince = {};
+function slowTrack(key, cond, ms) {
+  if (!cond) { delete slowSince[key]; return; }
+  if (slowSince[key] == null) { slowSince[key] = Date.now(); setTimeout(() => renderStatus(), ms + 100); }
+}
+const isSlow = (key, ms) => slowSince[key] != null && Date.now() - slowSince[key] >= ms;
+function gotoHost() {
+  go("more");
+  requestAnimationFrame(() => { const i = $("#hostInp"); if (!i) return; i.scrollIntoView({ block: "center", behavior: smoothOk() ? "smooth" : "auto" }); i.focus({ preventScroll: true }); });
+}
 function renderStatus() {
   const lamp = $("#connLamp"), txt = $("#connText"), pb = pBusy();
   let cls = "lamp", k = "";
@@ -3854,15 +3906,23 @@ function renderStatus() {
   // banner
   const bn = $("#banner"), btn = $("#bannerBtn"), hb = $("#bannerHelp");
   let show = true, title = "", text = "", err = false, action = null, help = null, lampCls = "lamp on breath";
+  slowTrack("search", !!(sseOk && S && !S.connected && S.searching), SLOW_SEARCH_MS);
+  slowTrack("power", !!(sseOk && S && S.connected && S.power == null && !pb), SLOW_POWER_MS);
   if (!sseOk && sseFailed) {
     title = t("banner.lostPc"); text = t("banner.lostPcText"); err = true; lampCls = "lamp red";
     action = { label: t("banner.retry"), fn: retryNow }; help = "helpPhone";
   }
   else if (!sseOk || !S) { title = t("status.connecting"); }
-  else if (!S.connected && S.searching) { title = t("banner.searching"); text = t("banner.searchingText"); }
+  else if (!S.connected && S.searching) {
+    title = t("banner.searching"); text = t("banner.searchingText");
+    if (isSlow("search", SLOW_SEARCH_MS)) { text = t("banner.searchingLong"); action = { label: t("banner.enterIp"), fn: gotoHost }; help = "helpFind"; }
+  }
   else if (!S.connected) {
     title = t("banner.noSpeaker"); text = t("banner.noSpeakerText"); err = true; lampCls = "lamp red";
     action = { label: t("banner.find"), fn: () => startFind(true) }; help = "helpFind";
+  }
+  else if (pb !== "on" && S.power == null && pb !== "off" && isSlow("power", SLOW_POWER_MS)) {
+    title = t("banner.noPower"); text = t("banner.noPowerText"); err = true; lampCls = "lamp red"; help = "helpFind";
   }
   else if (pb === "on" || (S.power == null && pb !== "off")) { title = t("banner.waking"); text = t("banner.wakingText"); }
   else if (S.power === false) { title = t("banner.standby"); text = t("banner.standbyText"); lampCls = "lamp red"; action = { label: t("pwr.on"), fn: () => $("#pwr").click() }; }
