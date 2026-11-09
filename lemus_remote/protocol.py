@@ -299,7 +299,10 @@ def decode_control(frame: bytes) -> dict | None:
             for s in doc.get("src", [])
             if "ix" in s
         ]
-        current = next((int(s["ix"]) for s in doc.get("src", []) if s.get("sts") == 1), None)
+        # sts 1 = aktiv kilde. Står mer enn én (eller ingen) med sts 1, vet vi ikke hvilken som er i bruk:
+        # da er kilden ukjent (None), i stedet for at den første i listen (HDMI) vises som aktiv.
+        active = [int(s["ix"]) for s in doc.get("src", []) if "ix" in s and s.get("sts") == 1]
+        current = active[0] if len(active) == 1 else None
         return {"sources": sources, "source": current}
     if key == (0x02, 0x89):
         try:

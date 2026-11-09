@@ -71,6 +71,8 @@ On the Lemus HOME 1500. "Confirmed" means it was tried on the real speaker and t
 | Live status | Confirmed. Room correction and Custom EQ are not announced by the speaker, so SUMEL polls them every 10 s |
 | Phone (browser and home screen) | Layout and controls tested in a phone-sized browser only. Not yet tested on a real iPhone or Android phone |
 
+**Known issue (SM450 firmware):** after switching to HDMI over the network, the amplifier can report HDMI as active while no sound comes out. The Platin app does the same. Fix it with the RF remote: switch to AUX/OPT and back to HDMI.
+
 **Not included:** new room measurements (make them in the Platin app; SUMEL switches the correction and shows the curve), factory reset, firmware updates, crossovers, per-channel EQ and delay. The speaker presets 1–3 are left out too: on the SM450 they revert to the app EQ after a few seconds.
 
 ## Getting started
@@ -260,5 +262,7 @@ SUMEL er ikke laget av eller tilknyttet Lemus eller Platin. Den skriver til DSP-
 **Installasjon:** Last ned `SUMEL-Setup-<versjon>.exe` fra [siste release](https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/latest) (64-biters Windows, testet på Windows 11, krever ingen GitHub-konto) og kjør den. Programmet er ikke kodesignert: ved «Windows beskyttet PC-en din» trykker du **Mer info → Kjør likevel**. Blokkerer Smart App Control programmet, kan du kjøre fra kildekoden i stedet: installer Python 3.10 eller nyere og kjør `py -m lemus_remote --open` i SUMEL-mappen.
 
 **Første gang:** Sett opp høyttaleren med produsentens app eller Google Home først, og ha PC-en på samme nett (ikke gjestenettet). SUMEL leter selv. Finner den ikke høyttaleren etter ca. 20 sekunder, trykker du **Skriv IP-adresse**. Står høyttaleren i standby, leses EQ-en når den våkner, og EQ-endringer er sperret til da. På mobilen åpner du adressen fra menyen ved klokken eller QR-koden under **Mer**. Tilgangskoden skrives inn én gang per enhet (QR-koden logger inn av seg selv). Mobilbruk er så langt bare testet i en nettleser i mobilstørrelse, ikke på en ekte telefon.
+
+**Kjent feil i SM450:** etter bytte til HDMI over nettverket kan forsterkeren melde HDMI uten at det kommer lyd. Platin-appen gjør det samme. Bruk fjernkontrollen: bytt til AUX/OPT og tilbake til HDMI.
 
 **EQ-plassene:** SUMEL skriver bare til de tre EQ-plassene SM450 setter av til appen. Et fjerde bånd ga et smell i testen og overskrev trolig en del av produsentens tuning. Filtre på andre plasser vises som låst og røres aldri. Har noe havnet der, slår du høyttaleren helt av (strømbryter eller stikkontakt) i 10 sekunder. Det laster trolig fabrikkoppsettet inn igjen (ikke bekreftet). Andre modeller enn Lemus HOME 1500 er ikke testet: prøv volum og inngang før du bruker EQ.

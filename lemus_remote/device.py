@@ -42,6 +42,7 @@ MUTE_CONFIRM = 2.0  # sekunder vi venter på at boks 0x3F bekrefter demping fra 
 MUTE_RAMP_STEP = 5  # volum-reserve: skru opp igjen i steg på høyst så mye ...
 MUTE_RAMP_DELAY = 0.12  # ... med så mange sekunder mellom hvert steg
 FOLLOW_DELAY = 0.6  # vent litt etter en kommando fra en annen klient før vi leser på nytt
+SOURCE_CONFIRM = 6.0  # sekunder vi venter på at kildelisten (02 02) viser den valgte kilden (HDMI kan bruke flere sekunder)
 WAKE_REFRESH_DELAYS = (2.0, 4.0, 6.0)  # etter vekking: les EQ og romkurve etter 2, 6 og 12 s (lydprosessoren trenger litt tid)
 WAKE_SOURCE_WAIT = 3.0  # etter vekking: vent så lenge på en fersk kildemelding før vi går tilbake til forrige inngang
 # Etter vekking svarer ikke lydprosessoren på båndlesing (08 04) de første sekundene (ca. 8 s ifølge databladet).
@@ -149,6 +150,7 @@ class Speaker:
         # _cmd_lock, aldri mens _cmd_lock holdes. Ikke reentrant: offentlige metoder tar låsen og
         # kaller _-variantene, som ikke tar den.
         self._eq_lock = asyncio.Lock()
+        self.source_confirm = SOURCE_CONFIRM
         self._source_seen = 0  # antall kildemeldinger (02 02), så vi kan vente på en fersk etter vekking
         self._source_before_standby: int | None = None
         self.wake_source_wait = WAKE_SOURCE_WAIT
@@ -788,12 +790,33 @@ class Speaker:
                 raise CommandError("høyttaleren bekreftet ikke preset")
 
     async def select_source(self, ix: int) -> None:
+        """Velg inngang og vent til høyttalerens egen kildeliste (02 02) viser den.
+
+        Kommandoen sendes også når tilstanden allerede viser denne kilden, fordi tilstanden kan være
+        utdatert (da må et nytt valg av HDMI likevel nå frem). Bekreftes den ikke, leses kildelisten
+        én gang til, så tilstanden viser det høyttaleren faktisk melder, og ikke kilden vi ba om."""
         if ix not in {s["ix"] for s in self.state["sources"]}:
             raise CommandError(f"ukjent kilde {ix}")
         async with self._cmd_lock:
+            seen = self._source_seen
             await self._send_control(p.select_source(ix))
-            if not await self._wait_for(lambda s: s["source"] == ix, 3, resend=p.GET_SOURCES, every=1.0):
-                raise CommandError("høyttaleren bekreftet ikke kildebytte")
+            ok = await self._wait_for(lambda s: self._source_seen != seen and s["source"] == ix,
+                                      self.source_confirm, resend=p.GET_SOURCES, every=1.5)
+            if not ok:
+                seen = self._source_seen
+                await self._send_control(p.GET_SOURCES)
+                await self._wait_for(lambda s: self._source_seen != seen, 2)
+                if self._source_seen == seen:
+                    # Høyttaleren svarer på kildelisten innen ca. 0,1 s når forbindelsen er i orden
+                    # (busmon-opptak 9.11.2026). Ingen svar betyr en død forbindelse: koble til på nytt
+                    # med en gang i stedet for å vise en gammel kilde til vakthunden slår til (45 s).
+                    log.info("50006: ingen svar på kildelisten, kobler til på nytt")
+                    if self._ctl is not None:
+                        self._ctl.close()
+                    raise CommandError("fikk ikke svar fra høyttaleren. Kobler til på nytt – prøv igjen om noen sekunder.")
+                name = {x["ix"]: x["name"] for x in self.state["sources"]}.get(self.state["source"])
+                now = f" Høyttaleren melder {name}." if name else " Høyttaleren melder ingen entydig aktiv kilde."
+                raise CommandError("høyttaleren bekreftet ikke kildebytte." + now)
 
     async def set_power(self, on: bool) -> None:
         """Slå på/av. Mens det pågår, står ``power_busy`` ("on"/"off") i tilstanden, så alle

@@ -4,6 +4,19 @@ All notable changes to SUMEL, newest first. The format is based on [Keep a Chang
 
 Downloads are on the [releases page](https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases).
 
+## [1.0.1] - 2026-11-09
+
+### Changed
+
+- **Input selection** waits for the speaker's own source list to confirm the new input (up to 6 s) and always shows the input the speaker reports, never the one that was requested. Selecting an input that is already shown as active is sent again, so a stale display can no longer block switching back to HDMI.
+- If the speaker does not answer at all, SUMEL reconnects straight away and says so, instead of showing an old input until the connection watchdog notices.
+- If the speaker's source list marks more than one input as active, the input is shown as unknown rather than as HDMI.
+- The lower row (Sound and Profile) now looks like part of the amplifier: walnut sides, engraved labels and buttons in a recessed well, aligned with the front panel.
+
+### Known issue
+
+- After switching to HDMI over the network, the SM450 can report HDMI as active while no sound comes out. This also happens with the Platin app, so it is the amplifier's firmware, not SUMEL. The RF remote fixes it: switch to AUX/OPT and back to HDMI with the remote.
+
 ## [1.0.0] - 2026-11-09
 
 ### Added
@@ -105,6 +118,7 @@ Development under the name Lemus Remote, before the public release. Not released
 - English and Norwegian, and a home-screen app on phones.
 - **0.9.0:** Curve EQ, the stored room curve, wider tone controls, and a Windows program with a tray icon and installer.
 
+[1.0.1]: https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/tag/v1.0.1
 [1.0.0]: https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/tag/v1.0.0
 [0.10.1]: https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/tag/v0.10.1
 [0.10.0]: https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/tag/v0.10.0

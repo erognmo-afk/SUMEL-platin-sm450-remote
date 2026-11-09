@@ -822,6 +822,28 @@ html[data-front="alu"] .fp-body { padding-top:22px; }
   html[data-front="alu"] .fp-lamps { padding:5px 8px; gap:8px; }
   html[data-front="alu"] .fp-lamps span { gap:4px; letter-spacing:.04em; }
 }
+/* ---------------- Nedre rad (Lyd og Profil) som en del av forsterkeren: samme kabinett med valnøttsider, graverte
+   etiketter og knapper i en innfelt brønn som inngangsvelgeren. Sidene og innholdet flukter med frontplaten over. */
+.deck { padding:0 12px; background:radial-gradient(130% 70% at 50% 0%, #2a2825 0%, #1f1e1c 48%, #191816 100%);
+  box-shadow:0 0 0 1px rgba(0,0,0,.75), 0 30px 60px -20px rgba(0,0,0,.8), 0 10px 20px -10px rgba(0,0,0,.5); }
+.deck .deck-h { font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--faint); }
+.deck .togs, .deck .chips { padding:3px; gap:6px; border-radius:var(--radius-s); background:var(--well);
+  border:1px solid var(--line); box-shadow:inset 0 1px 3px rgba(0,0,0,.6); }
+.deck .tog, .deck .chip { border-radius:var(--radius-xs); border:1px solid rgba(0,0,0,.55);
+  background:linear-gradient(180deg, #2a2825, #201f1d); box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 2px 5px rgba(0,0,0,.35); }
+.deck .tog[aria-checked="true"], .deck .chip[aria-pressed="true"] { background:linear-gradient(180deg, #22201e, #1b1a18); box-shadow:inset 0 2px 5px rgba(0,0,0,.55); }
+.deck .tog .t b { font-size:11.5px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; }
+.deck .chip { font-size:11.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.deck .chip[aria-pressed="true"] { color:var(--fg); }
+.deck .deck-all { border-radius:var(--radius-xs); border:1px solid rgba(0,0,0,.55); background:linear-gradient(180deg, #2a2825, #201f1d);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 2px 5px rgba(0,0,0,.35); font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+html[data-front="alu"] .deck { padding:0; }
+@media (min-width: 1000px) {
+  .deck, html[data-front="alu"] .deck { padding:0 26px; }
+  .deck .deck-sec:first-of-type { padding-left:30px; }
+  .deck .deck-sec:last-of-type { padding-right:36px; }
+  .deck .chip { font-size:11px; min-height:40px; padding:0 11px; letter-spacing:.08em; gap:6px; }
+}
 </style>
 </head>
 <body>
@@ -907,6 +929,7 @@ html[data-front="alu"] .fp-body { padding-top:22px; }
   </div>
 
   <div class="deck" id="deck">
+    <span class="fp-cheek l"></span><span class="fp-cheek r"></span>
     <section class="deck-sec" aria-label="Lyd" data-i18n-aria="amp.sound">
       <h2 class="deck-h" data-i18n="amp.sound">Lyd</h2>
       <div class="togs">
@@ -1210,7 +1233,7 @@ html[data-front="alu"] .fp-body { padding-top:22px; }
       </div>
     </div>
   </details>
-  <p class="small muted" id="aboutLine" style="margin:22px 4px 8px;opacity:.75"><b>SUMEL</b> 1.0.0 · <span data-i18n="about.tag">fjernkontroll for Platin SM450</span><br><i data-i18n="about.why">Utviklet grunnet irritasjon på dårlige eller ikke-eksisterende apper. =)</i></p>
+  <p class="small muted" id="aboutLine" style="margin:22px 4px 8px;opacity:.75"><b>SUMEL</b> 1.0.1 · <span data-i18n="about.tag">fjernkontroll for Platin SM450</span><br><i data-i18n="about.why">Utviklet grunnet irritasjon på dårlige eller ikke-eksisterende apper. =)</i></p>
 </section>
 </main>
 <div id="toasts" aria-live="polite"></div>
@@ -1622,6 +1645,9 @@ const ERR_EN = [
   [/^høyttaleren bekreftet ikke slettingen$/, () => "the speaker didn’t confirm the deletion"],
   [/^høyttaleren bekreftet ikke at den slo seg av$/, () => "the speaker didn’t confirm that it switched off"],
   [/^høyttaleren bekreftet ikke (manuell EQ|romkorreksjon|preset|kildebytte|volum)$/, m => `the speaker didn’t confirm ${CONFIRM_EN[m[1]]}`],
+  [/^fikk ikke svar fra høyttaleren\. Kobler til på nytt – prøv igjen om noen sekunder\.$/, () => "no answer from the speaker. Reconnecting – try again in a few seconds."],
+  [/^høyttaleren bekreftet ikke kildebytte\. Høyttaleren melder ingen entydig aktiv kilde\.$/, () => "the speaker didn’t confirm the input change. It reports no clear active input."],
+  [/^høyttaleren bekreftet ikke kildebytte\. Høyttaleren melder (.+)\.$/, m => `the speaker didn’t confirm the input change. It reports ${m[1]}.`],
   [/^profilen bruker «(.+)», som ikke kan skrives ennå$/, m => `the profile uses “${typeNameFromNo(m[1])}”, which can’t be written yet`],
   [/^profilen har (\d+) bånd, men SM450 tar høyst (\d+)$/, m => `the profile has ${m[1]} bands, but the SM450 takes at most ${m[2]}`],
   [/^profilen og båndene som ikke kan skrives blir til sammen mer enn (\d+) bånd$/, m => `the profile plus the bands that can’t be written add up to more than ${m[1]} bands`],
@@ -2225,7 +2251,9 @@ $("#pwr").onclick = async () => {
 
 let srcBusy = null;
 async function pickSource(ix) {
-  if (!awake() || srcBusy != null || (S && S.source === ix)) return;
+  // Sendes også når kilden allerede vises som aktiv: visningen kan være utdatert, og et nytt valg av
+  // samme kilde skal da likevel nå høyttaleren (særlig HDMI).
+  if (!awake() || srcBusy != null) return;
   srcBusy = ix; renderSources(true);
   await api("/api/source", { ix });
   srcBusy = null; renderSources(true);
