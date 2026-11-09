@@ -89,7 +89,7 @@ Note that the speaker itself has **no authentication** on the local network. Any
 
 ### Windows installer
 
-1. Download `SUMEL-Setup-<version>.exe` from the **[latest release](https://github.com/erognmo-afk/sumel-platin-sm450-remote/releases/latest)** (no GitHub account needed).
+1. Download `SUMEL-Setup-<version>.exe` from the **[latest release](https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/latest)** (no GitHub account needed).
 2. Run the installer. It adds a firewall rule (private networks only) so phones can reach the PC, and optionally starts SUMEL with Windows.
 3. SUMEL opens in your browser. It has no window of its own; it lives as an **icon next to the clock**. Right-click it for the phone address, the access code, autostart and Quit.
 
@@ -106,7 +106,7 @@ Uninstall from **Settings → Apps**. Your settings stay in `%APPDATA%\LemusRemo
 Needs **Python 3.10 or newer**. No other packages.
 
 ```bash
-git clone https://github.com/erognmo-afk/sumel-platin-sm450-remote.git SUMEL
+git clone https://github.com/erognmo-afk/SUMEL-platin-sm450-remote.git SUMEL
 cd SUMEL
 python -m lemus_remote --open          # on Windows: py -m lemus_remote --open
 ```
@@ -224,4 +224,4 @@ SUMEL er en uoffisiell fjernkontroll for høyttalere med Platin SM450, laget for
 
 SUMEL er ikke laget av eller tilknyttet Lemus eller Platin. Den skriver til DSP-en, så bruk den på egen risiko. Den er bare testet på Lemus HOME 1500. Programmet tar høyst tre EQ-bånd: et fjerde bånd ga et smell i testen og overskrev trolig produsentens tuning (ifølge SM450 datasheet v1.3 er bare tre filtre satt av til appens EQ).
 
-**Installere:** Last ned `SUMEL-Setup-….exe` fra [siste release](https://github.com/erognmo-afk/sumel-platin-sm450-remote/releases/latest) (krever ingen GitHub-konto), og kjør den. Programmet er ikke signert: ved «Windows beskyttet PC-en» trykker du **Mer info → Kjør likevel**. Er Smart App Control på, blokkeres det helt; bruk da Python-varianten: installer Python 3.10 eller nyere og kjør `py -m lemus_remote --open` i mappen (eventuelt med `--host <ip>`). SUMEL ligger som et ikon ved klokken, der du også finner adressen og tilgangskoden for mobilen. Appen er på engelsk som standard, men blir norsk når nettleseren eller Windows er på norsk. Du kan bytte når som helst under **Mer → Språk / Language**.
+**Installere:** Last ned `SUMEL-Setup-….exe` fra [siste release](https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/latest) (krever ingen GitHub-konto), og kjør den. Programmet er ikke signert: ved «Windows beskyttet PC-en» trykker du **Mer info → Kjør likevel**. Er Smart App Control på, blokkeres det helt; bruk da Python-varianten: installer Python 3.10 eller nyere og kjør `py -m lemus_remote --open` i mappen (eventuelt med `--host <ip>`). SUMEL ligger som et ikon ved klokken, der du også finner adressen og tilgangskoden for mobilen. Appen er på engelsk som standard, men blir norsk når nettleseren eller Windows er på norsk. Du kan bytte når som helst under **Mer → Språk / Language**.
