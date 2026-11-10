@@ -6,7 +6,7 @@
 ; oppgraderer en installert Lemus Remote på plass (samme mappe, samme oppføring i Apper).
 ;
 ; Bygg først programmet med PyInstaller (packaging/sumel.spec), så:
-;   iscc /DAppVersion=1.0.1 packaging\installer.iss
+;   iscc /DAppVersion=1.1.0 packaging\installer.iss
 ; (packaging\build.ps1 gjør begge deler.)
 ;
 ; Lagres som UTF-8 MED BOM: uten BOM leser ISCC filen som ANSI, og «når» blir «nÃ¥r».

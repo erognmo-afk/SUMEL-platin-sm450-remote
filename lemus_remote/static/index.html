@@ -128,8 +128,6 @@ main { max-width:1320px; margin:0 auto; padding:16px calc(16px + var(--safe-r)) 
 .card > h2::after, .sect::after { content:""; flex:1; height:1px; background:linear-gradient(90deg, var(--line-2), transparent); }
 .card > h2 .right, .sect .right { order:3; margin-left:auto; letter-spacing:.01em; text-transform:none; font-weight:500; }
 /* språkkortet: overskrift og velger på én linje, så kortet blir lavt */
-#langCard { display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; padding-top:12px; padding-bottom:12px; }
-#langCard > h2 { margin:0; flex:1 1 160px; }
 .page-title { margin:4px 2px 16px; }
 .page-title h1 { font-family:var(--display); font-weight:300; font-size:26px; letter-spacing:.01em; margin:0; }
 .page-title p { color:var(--muted); margin:4px 0 0; font-size:14px; max-width:62ch; }
@@ -667,9 +665,7 @@ body.locked .need-awake { opacity:.5; }
   /* ferdige profiler: to kolonner med samme rader som «Mine profiler» */
   .mine.cols { display:grid; grid-template-columns:1fr 1fr; column-gap:36px; align-items:start; }
   .mine.cols .mine-item:nth-child(2) { border-top:0; padding-top:0; }
-  .room-grid { grid-template-columns:1fr 1fr; gap:20px; grid-template-areas:"resp resp" "status data"; }
-  .room-grid > #roomResp { grid-area:resp; } .room-grid > #roomStatus { grid-area:status; }
-  .room-grid > #roomData { grid-area:data; }
+  .room-grid { gap:20px; }
   .room-grid #roomCanvas { height:260px !important; }
 }
 @media (min-width: 1000px) and (max-width: 1239px) {
@@ -866,6 +862,56 @@ html[data-front="alu"] .deck { padding:0; }
   .fp-ctrl .inputs .sel { display:grid; grid-auto-flow:column; grid-auto-columns:1fr; }
   .fp-ctrl .inputs .sel .src { justify-content:center; }
 }
+/* ---------------- Opprydding 1.1: jevne knapperader, færre gjentakelser */
+/* Profilknappene fyller brønnen i like brede kolonner, med «Alle» som siste knapp */
+.deck .chips { display:grid; grid-template-columns:repeat(auto-fit, minmax(92px, 1fr)); }
+.deck .chip { justify-content:center; min-width:0; }
+.deck .chip.all { color:var(--fg-2); }
+.deck .togs .tog { justify-content:center; }
+.deck .togs .tog .t { flex:none; }
+/* Rom: ett kort med bryter og «Les på nytt» på samme rad; lampen viser av/på */
+#langCard .seg { align-self:flex-start; }
+.bcount { align-self:center; margin-left:4px; }
+.room-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.room-row .tog { flex:1 1 280px; width:auto; }
+#togRoom2 .state { display:none; }
+/* Profiler: én rad per profil med knappene til høyre */
+.mine-item { grid-template-columns:96px minmax(0, 1fr) auto; }
+.mine-item .acts { grid-column:auto; justify-content:flex-end; flex-wrap:nowrap; }
+.mine-item .more { grid-column:1 / -1; justify-content:flex-end; padding:0; }
+.mine-item .more :is([data-a="del"], [data-a="reset"]) { margin-left:0; }
+.active-line .lbl { margin-right:6px; }
+/* Tips og tastatur: lukket som standard */
+details.tips { margin-top:10px; }
+details.tips > summary { cursor:pointer; font-size:12.5px; color:var(--faint); list-style:none; display:inline-flex; align-items:center; gap:6px; min-height:28px; }
+details.tips > summary::-webkit-details-marker { display:none; }
+details.tips > summary::before { content:"?"; width:16px; height:16px; border-radius:50%; display:grid; place-items:center; font-size:11px; font-weight:600; border:1px solid var(--line-2); color:var(--muted); }
+details.tips[open] > summary { color:var(--fg-2); }
+details.tips .hint { margin-top:4px; }
+@media (min-width: 1000px) {
+  .togs { grid-template-columns:repeat(2, 176px); }
+}
+@media (max-width: 999px) {
+  /* mobil og nettbrett: avspillingsknappene i samme stil som inngangsknappene */
+  .fp-ctrl .transport { gap:6px; padding:3px; border-radius:var(--radius-s); background:var(--well); border:1px solid var(--line); box-shadow:inset 0 1px 3px rgba(0,0,0,.6); width:100%; }
+  .fp-ctrl .transport .round, .fp-ctrl .transport .round.main { flex:1 1 0; width:auto; height:44px; border-radius:var(--radius-xs);
+    border:1px solid rgba(0,0,0,.55); background:linear-gradient(180deg, #2a2825, #201f1d); color:var(--muted);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 2px 5px rgba(0,0,0,.35); }
+  .fp-ctrl .transport .round:active:not(:disabled) { background:linear-gradient(180deg, #22201e, #1b1a18); box-shadow:inset 0 2px 5px rgba(0,0,0,.55); }
+  .deck .chips { grid-template-columns:repeat(3, minmax(0, 1fr)); }
+  .deck .chip { font-size:10.5px; letter-spacing:.06em; padding:0 6px; white-space:nowrap; }
+  .deck .togs { grid-template-columns:1fr 1fr; }
+  .deck .tog { padding:0 8px; }
+  .deck .tog .t b { font-size:10.5px; letter-spacing:.08em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+}
+@media (max-width: 520px) {
+  /* telefon: «SUMEL» står allerede øverst i appen – listen viser bare lampene, i full bredde */
+  html[data-front="alu"] .fp-mark { display:none; }
+  html[data-front="alu"] .fp-lamps { flex:1; margin-left:0; justify-content:space-around; }
+  .mine-item { grid-template-columns:72px minmax(0, 1fr) auto; gap:10px; }
+  .mine-item canvas { width:72px; height:40px; }
+  .mine-item .sub { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+}
 </style>
 </head>
 <body>
@@ -966,7 +1012,6 @@ html[data-front="alu"] .deck { padding:0; }
     <section class="deck-sec" aria-label="Profil" data-i18n-aria="amp.profile">
       <h2 class="deck-h" data-i18n="amp.profile">Profil</h2>
       <div class="chips" id="quickProfiles"></div>
-      <button class="btn ghost sm deck-all" data-goto="profiles" data-i18n="amp.all">Alle</button>
     </section>
   </div>
 </section>
@@ -998,7 +1043,7 @@ html[data-front="alu"] .deck { padding:0; }
         <div class="stepper"><button data-qs="-1" aria-label="Ned" data-i18n-aria="eq.down">−</button><output id="qVal" aria-live="polite"></output><button data-qs="1" aria-label="Opp" data-i18n-aria="eq.up">+</button></div>
       </div>
       <div class="bandlist" id="bandlist" role="group" aria-label="EQ-punkter" data-i18n-aria="eq.points"></div>
-      <div class="hint" id="eqHint"><span class="kbd-only" data-i18n-html="eq.hintKbd">Dra punktene. Dobbeltklikk på en tom plass for et nytt punkt. Tastatur: <kbd>←</kbd><kbd>→</kbd> frekvens, <kbd>↑</kbd><kbd>↓</kbd> nivå, <kbd>[</kbd><kbd>]</kbd> Q, <kbd>Shift</kbd> større steg, <kbd>,</kbd><kbd>.</kbd> bytt punkt, <kbd>Del</kbd> slett.</span><span class="touch-only" data-i18n="eq.hintTouch">Dra punktene. Hold fingeren på en tom plass for et nytt punkt. Endringer skrives til høyttaleren og bekreftes.</span></div>
+      <details class="tips"><summary data-i18n="common.tips">Tips og tastatur</summary><div class="hint" id="eqHint"><span class="kbd-only" data-i18n-html="eq.hintKbd">Dra punktene. Dobbeltklikk på en tom plass for et nytt punkt. Tastatur: <kbd>←</kbd><kbd>→</kbd> frekvens, <kbd>↑</kbd><kbd>↓</kbd> nivå, <kbd>[</kbd><kbd>]</kbd> Q, <kbd>Shift</kbd> større steg, <kbd>,</kbd><kbd>.</kbd> bytt punkt, <kbd>Del</kbd> slett.</span><span class="touch-only" data-i18n="eq.hintTouch">Dra punktene. Hold fingeren på en tom plass for et nytt punkt. Endringer skrives til høyttaleren og bekreftes.</span></div></details>
     </div>
     <div class="stack">
       <div class="card" id="inspector">
@@ -1057,14 +1102,14 @@ html[data-front="alu"] .deck { padding:0; }
         <span id="curveConfirmText"></span>
         <div class="row" style="margin-top:10px"><button type="button" class="btn sm alu" id="curveConfirmYes" data-i18n="curve.replace">Erstatt</button><button type="button" class="btn sm ghost" id="curveConfirmNo" data-i18n="common.cancel">Avbryt</button></div>
       </div>
-      <div class="hint"><span class="kbd-only" data-i18n-html="curve.hintKbd">Dra punktene rett opp og ned (±12 dB). Dobbeltklikk på et punkt setter det til 0. Tastatur: <kbd>←</kbd><kbd>→</kbd> velg punkt, <kbd>↑</kbd><kbd>↓</kbd> ±0,5 dB, <kbd>Shift</kbd> større steg, <kbd>0</kbd> til 0.</span><span class="touch-only" data-i18n="curve.hintTouch">Dra punktene rett opp og ned (±12 dB). Dobbelttrykk setter et punkt til 0. Ingenting sendes til høyttaleren før du trykker «Bruk».</span></div>
+      <details class="tips"><summary data-i18n="common.tips">Tips og tastatur</summary><div class="hint"><span class="kbd-only" data-i18n-html="curve.hintKbd">Dra punktene rett opp og ned (±12 dB). Dobbeltklikk på et punkt setter det til 0. Tastatur: <kbd>←</kbd><kbd>→</kbd> velg punkt, <kbd>↑</kbd><kbd>↓</kbd> ±0,5 dB, <kbd>Shift</kbd> større steg, <kbd>0</kbd> til 0.</span><span class="touch-only" data-i18n="curve.hintTouch">Dra punktene rett opp og ned (±12 dB). Dobbelttrykk setter et punkt til 0. Ingenting sendes til høyttaleren før du trykker «Bruk».</span></div>
+        <p class="small muted" style="margin:8px 0 0" data-i18n="curve.explain">SM450 har plass til tre filtre. Appen prøver parametriske filtre og bass- og diskantfiltre (shelving) med ulike frekvenser og bredder og velger de som til sammen ligger nærmest kurven din. Ingenting sendes til høyttaleren før du trykker «Bruk».</p></details>
     </div>
     <div class="stack">
       <div class="card" id="fitCard">
         <h2 data-i18n="curve.filters">Filtrene</h2>
         <div class="fit-head"><span class="big num" id="fitErr">–</span><span class="small muted" id="fitErrLbl"></span></div>
         <div class="fit-list" id="fitList"></div>
-        <p class="small muted" style="margin:12px 0 0" data-i18n="curve.explain">SM450 har plass til tre filtre. Appen prøver parametriske filtre og bass- og diskantfiltre (shelving) med ulike frekvenser og bredder og velger de som til sammen ligger nærmest kurven din. Ingenting sendes til høyttaleren før du trykker «Bruk».</p>
       </div>
       <div class="card">
         <h2 data-i18n="curve.saveTitle">Lagre som profil</h2>
@@ -1096,16 +1141,12 @@ html[data-front="alu"] .deck { padding:0; }
       <p class="small muted" style="margin-top:10px;margin-bottom:0" data-i18n="room.respNote">Romkorreksjonen virker bare under ca. 550 Hz. Høyttaleren lagrer målingen bare under det, så kurvene er flate over 550 Hz (det betyr ikke at rommet er flatt der). Toppene vises uglattet og kan derfor se høyere ut.</p>
     </div>
     <div class="card" id="roomStatus">
-      <h2 data-i18n="room.status">Status</h2>
-      <button class="tog" id="togRoom2" role="switch" aria-checked="false" data-need="awake">
-        <span class="lamp"></span><span class="t"><b data-i18n="sw.room">Romkorreksjon</b><small id="roomSmall"></small></span><span class="state">–</span>
-      </button>
-      <div class="note" style="margin-top:12px" data-i18n="room.note">Målingen ligger i høyttaleren og beholdes når du slår korreksjonen av. Egen EQ ligger alltid oppå romkorreksjonen og påvirkes ikke av denne bryteren.</div>
-    </div>
-    <div class="card" id="roomData">
-      <h2 data-i18n="room.data">Målingen</h2>
-      <p class="small muted" data-i18n="room.dataLead">SUMEL leser målingen når den kobler til høyttaleren. Knappen leser den på nytt.</p>
-      <div class="row"><button class="btn" id="roomRead" data-need="online" data-i18n="room.read">Les målingen på nytt</button><span class="saving" id="roomReadState"></span></div>
+      <div class="room-row">
+        <button class="tog" id="togRoom2" role="switch" aria-checked="false" data-need="awake">
+          <span class="lamp"></span><span class="t"><b data-i18n="sw.room">Romkorreksjon</b><small id="roomSmall"></small></span><span class="state">–</span>
+        </button>
+        <button class="btn" id="roomRead" data-need="online" data-i18n="room.read">Les målingen på nytt</button><span class="saving" id="roomReadState"></span>
+      </div>
       <details class="raw" id="sparkDetails" style="margin-top:14px" hidden>
         <summary class="small muted" data-i18n="room.rawShow">Vis rådata</summary>
         <div id="sparkBox" style="margin-top:10px">
@@ -1159,22 +1200,15 @@ html[data-front="alu"] .deck { padding:0; }
 <!-- ===================================================== MER -->
 <section class="view" id="view-more" aria-label="Mer" data-i18n-aria="nav.more">
   <div class="page-title"><h1 data-i18n="nav.more">Mer</h1><p data-i18n="more.lead">Hjelp, høyttaler og tilkobling.</p></div>
-  <div class="card faq" id="helpCard">
-    <h2 data-i18n="help.title">Hjelp</h2>
-    <details id="helpPhone"><summary data-i18n="help.q1">iPhone får ikke kontakt</summary><div class="ans" data-i18n-html="help.a1"><ul><li>iPhone og PC-en må være på samme nettverk (samme ruter), og PC-en må være våken.</li><li>Noen rutere holder Wi-Fi-enheter fra hverandre. Koble da PC-en til ruteren med kabel, eller bruk Tailscale på både PC-en og iPhone.</li><li>Windows-brannmuren og Norton eller annet antivirus må tillate SUMEL. Velg «Tillat» når de spør, eller legg SUMEL til som unntak.</li></ul></div></details>
-    <details id="helpFind"><summary data-i18n="help.q2">«Finn høyttaleren» finner ingenting</summary><div class="ans" data-i18n-html="help.a2"><p>Sjekk at høyttaleren har strøm og er koblet til samme nettverk som PC-en.</p><p>Skriv så høyttalerens IP-adresse under «Tilkobling», for eksempel 192.168.0.6. Adressen står i ruterens liste over tilkoblede enheter.</p></div></details>
-    <details id="helpTone"><summary data-i18n="help.q3">Hvorfor endrer tonehjulene EQ-en?</summary><div class="ans" data-i18n-html="help.a3"><p>SM450 har plass til tre filtre. Tonehjulene og EQ-fanen deler de samme tre. Drar du et tonehjul mens EQ-en har en kurve eller egne punkter, gjøres den om til bass, mellomtone og diskant, slik at lyden endres minst mulig. Du kan alltid angre.</p></div></details>
-    <details id="helpMode"><summary data-i18n="help.q4">Kurve eller Punkter?</summary><div class="ans" data-i18n-html="help.a4"><p><b>Kurve:</b> tegn lyden du vil ha med ti punkter, så finner appen de tre filtrene som passer best. Ingenting sendes før du trykker «Bruk».</p><p><b>Punkter:</b> still de tre filtrene direkte, med frekvens, nivå og bredde. Hver endring sendes med en gang.</p></div></details>
-  </div>
-  <div class="two" style="margin-top:14px">
+  <div class="two">
     <div class="stack">
-      <div class="card" id="langCard">
-        <h2>Språk / Language</h2>
-        <div class="seg" role="group" aria-label="Språk / Language" id="langSeg"><button type="button" data-lang="no" lang="nb" aria-pressed="false">Norsk</button><button type="button" data-lang="en" lang="en" aria-pressed="false">English</button></div>
-      </div>
       <div class="card" id="lookCard">
-        <h2 data-i18n="more.look">Utseende</h2>
-        <div class="field">
+        <h2 data-i18n="more.look">Utseende og språk</h2>
+        <div class="field" id="langCard">
+          <span>Språk / Language</span>
+          <div class="seg" role="group" aria-label="Språk / Language" id="langSeg"><button type="button" data-lang="no" lang="nb" aria-pressed="false">Norsk</button><button type="button" data-lang="en" lang="en" aria-pressed="false">English</button></div>
+        </div>
+        <div class="field" style="margin-top:14px">
           <span id="frontLbl" data-i18n="more.front">Frontplate</span>
           <div class="seg" role="group" aria-labelledby="frontLbl" id="frontSeg"><button type="button" data-front-opt="alu" aria-pressed="true" data-i18n="more.frontAlu">Med aluminiumslist</button><button type="button" data-front-opt="plain" aria-pressed="false" data-i18n="more.frontPlain">Uten aluminiumslist</button></div>
         </div>
@@ -1227,6 +1261,13 @@ html[data-front="alu"] .deck { padding:0; }
     </div>
   </div>
 
+  <div class="card faq" id="helpCard" style="margin-top:14px">
+    <h2 data-i18n="help.title">Hjelp</h2>
+    <details id="helpPhone"><summary data-i18n="help.q1">iPhone får ikke kontakt</summary><div class="ans" data-i18n-html="help.a1"><ul><li>iPhone og PC-en må være på samme nettverk (samme ruter), og PC-en må være våken.</li><li>Noen rutere holder Wi-Fi-enheter fra hverandre. Koble da PC-en til ruteren med kabel, eller bruk Tailscale på både PC-en og iPhone.</li><li>Windows-brannmuren og Norton eller annet antivirus må tillate SUMEL. Velg «Tillat» når de spør, eller legg SUMEL til som unntak.</li></ul></div></details>
+    <details id="helpFind"><summary data-i18n="help.q2">«Finn høyttaleren» finner ingenting</summary><div class="ans" data-i18n-html="help.a2"><p>Sjekk at høyttaleren har strøm og er koblet til samme nettverk som PC-en.</p><p>Skriv så høyttalerens IP-adresse under «Tilkobling», for eksempel 192.168.0.6. Adressen står i ruterens liste over tilkoblede enheter.</p></div></details>
+    <details id="helpTone"><summary data-i18n="help.q3">Hvorfor endrer tonehjulene EQ-en?</summary><div class="ans" data-i18n-html="help.a3"><p>SM450 har plass til tre filtre. Tonehjulene og EQ-fanen deler de samme tre. Drar du et tonehjul mens EQ-en har en kurve eller egne punkter, gjøres den om til bass, mellomtone og diskant, slik at lyden endres minst mulig. Du kan alltid angre.</p></div></details>
+    <details id="helpMode"><summary data-i18n="help.q4">Kurve eller Punkter?</summary><div class="ans" data-i18n-html="help.a4"><p><b>Kurve:</b> tegn lyden du vil ha med ti punkter, så finner appen de tre filtrene som passer best. Ingenting sendes før du trykker «Bruk».</p><p><b>Punkter:</b> still de tre filtrene direkte, med frekvens, nivå og bredde. Hver endring sendes med en gang.</p></div></details>
+  </div>
   <details class="expert" id="expert">
     <summary><span data-i18n="more.expert">Ekspert og feilsøking</span><span class="chev" aria-hidden="true"></span></summary>
     <div class="two">
@@ -1237,6 +1278,7 @@ html[data-front="alu"] .deck { padding:0; }
           <div class="note" style="margin-top:12px" data-i18n="more.typesNote">Slik lærer appen flere typer: lag eller lagre et filter av typen (for eksempel 6 dB høypass eller lavpass) i Platin-appen mens SUMEL kjører på PC-en. Appen logger da hvordan høyttaleren lagrer filteret, og typen blir skrivbar her.</div>
           <div class="sect" style="margin-top:18px" data-i18n="more.learnLog">Læringslogg</div>
           <div id="learnLog" class="small muted"></div>
+          <p class="small muted" id="verifiedLine" style="margin:14px 0 0"></p>
         </div>
       </div>
       <div class="stack">
@@ -1255,7 +1297,7 @@ html[data-front="alu"] .deck { padding:0; }
       </div>
     </div>
   </details>
-  <p class="small muted" id="aboutLine" style="margin:22px 4px 8px;opacity:.75"><b>SUMEL</b> 1.0.1 · <span data-i18n="about.tag">fjernkontroll for Platin SM450</span><br><i data-i18n="about.why">Utviklet grunnet irritasjon på dårlige eller ikke-eksisterende apper. =)</i></p>
+  <p class="small muted" id="aboutLine" style="margin:22px 4px 8px;opacity:.75"><b>SUMEL</b> 1.1.0 · <span data-i18n="about.tag">fjernkontroll for Platin SM450</span><br><i data-i18n="about.why">Utviklet grunnet irritasjon på dårlige eller ikke-eksisterende apper. =)</i></p>
 </section>
 </main>
 <div id="toasts" aria-live="polite"></div>
@@ -1351,7 +1393,7 @@ const I18N = {
     "prof.resetTitle": "Sett profilen tilbake slik den var fra start", "toast.reset": "«{name}» er tilbakestilt til standard",
     "toast.renamed": "Nytt navn lagret", "toast.updated": "«{name}» er oppdatert med innstillingene nå", "toast.reverted": "«{name}» er satt tilbake",
     "toast.duplicated": "Profilen er duplisert", "toast.deleted": "«{name}» er slettet",
-    "act.label": "Aktivt i høyttaleren:", "act.matches": "samsvarer med {names}.", "act.custom": "egen innstilling – samsvarer ikke med en lagret profil.",
+    "amp.all": "Alle", "act.label": "Aktiv nå:", "act.matches": "{names}", "act.custom": "Egen innstilling",
     "act.writable": "{n} skrivbare punkt", "act.ro": ", {n} punkt av typer appen ikke kan skrive ennå (røres ikke av profiler)",
     "act.outside": ", {n} punkt utenfor de tre plassene SUMEL kan bruke (røres ikke)", "act.notRead": "EQ-en er ikke lest ennå.",
     "act.room": v => `romkorreksjon ${v.on ? "på" : "av"}`, "act.eq": v => `egen EQ ${v.on ? "på" : "av"}`,
@@ -1459,7 +1501,7 @@ const I18N = {
     "prof.namePh": "Name, e.g. “Movie night”", "prof.nameAria": "Name of new profile", "prof.saveCurrent": "Save current",
     "prof.backup": "Backup", "prof.backupLead": "Downloads your profiles, the EQ bands in the speaker and learned filter formats as one file.",
     "prof.download": "Download", "prof.restoreDots": "Restore …", "prof.restoreApply": "Also write the EQ bands from the file to the speaker", "prof.restore": "Restore",
-    "more.look": "Appearance", "more.front": "Front panel", "more.frontPlain": "Without aluminium strip", "more.frontAlu": "With aluminium strip", "about.tag": "remote for Platin SM450", "about.why": "Made out of frustration with poor or non-existent apps. =)",
+    "more.look": "Appearance and language", "more.front": "Front panel", "more.frontPlain": "Without aluminium strip", "more.frontAlu": "With aluminium strip", "about.tag": "remote for Platin SM450", "about.why": "Made out of frustration with poor or non-existent apps. =)",
     "more.frontNote": "Only applies to this device.",
     "more.lead": "Help, speaker and connection.", "more.speaker": "Speaker", "more.iphone": "Use on iPhone",
     "more.iphoneLead": "The iPhone must be on the same network as the PC.",
@@ -1550,7 +1592,7 @@ const I18N = {
     "prof.resetTitle": "Set the profile back to how it came", "toast.reset": "“{name}” reset to default",
     "toast.renamed": "New name saved", "toast.updated": "“{name}” updated with the current settings", "toast.reverted": "“{name}” restored",
     "toast.duplicated": "Profile duplicated", "toast.deleted": "“{name}” deleted",
-    "act.label": "Active in the speaker:", "act.matches": "matches {names}.", "act.custom": "custom setting – doesn’t match a saved profile.",
+    "act.label": "Active now:", "act.matches": "{names}", "act.custom": "Custom setting",
     "act.writable": v => `${v.n} writable point${v.n === 1 ? "" : "s"}`, "act.ro": v => `, ${v.n} point${v.n === 1 ? "" : "s"} of types the app can’t write yet (left alone by profiles)`,
     "act.outside": v => `, ${v.n} point${v.n === 1 ? "" : "s"} outside the three slots SUMEL can use (left alone)`, "act.notRead": "the EQ hasn’t been read yet.",
     "act.room": v => `room correction\u00a0${v.on ? "on" : "off"}`, "act.eq": v => `custom EQ\u00a0${v.on ? "on" : "off"}`,
@@ -1566,7 +1608,7 @@ const I18N = {
     "roomread.reading": "Reading …", "roomread.done": "Read", "roomread.none": "No data received", "spark.meta": "{n} values · {mn}–{mx}",
     "feat.manual_eq": "Custom EQ", "feat.room_correction": "Room correction", "feat.volume": "Volume", "feat.transport": "Playback",
     "feat.eq_bands": "EQ points", "feat.power": "Power", "feat.source": "Input",
-    "info.name": "Name", "info.amp": "Amplifier", "info.address": "Address", "info.firmware": "Firmware", "info.verified": "Tested on Lemus HOME 1500", "eq.notRead": "The speaker’s EQ hasn’t been read yet (it may be waking from standby). Try again in a few seconds.", "prof.confirmReplace": v => `“${v.name}” replaces the ${v.n === 1 ? "filter" : `${v.n} filters`} in the speaker now. You can undo afterwards.`,
+    "info.name": "Name", "info.amp": "Amplifier", "info.address": "Address", "info.firmware": "Firmware", "info.verified": "Tested on Lemus HOME 1500", "common.tips": "Tips and keyboard", "eq.notRead": "The speaker’s EQ hasn’t been read yet (it may be waking from standby). Try again in a few seconds.", "prof.confirmReplace": v => `“${v.name}” replaces the ${v.n === 1 ? "filter" : `${v.n} filters`} in the speaker now. You can undo afterwards.`,
     "prof.noRoom": v => `The profile “${v.name}” has ${v.n} filter${v.n === 1 ? "" : "s"}, but ${v.m === 0 ? "no slots are free" : v.m === 1 ? "only one slot is free" : "only " + v.m + " slots are free"} because ${v.list} ${v.k === 1 ? "is" : "are"} kept.`,
     "host.auto": "Finds the speaker automatically{now}.", "host.autoNow": " (now {host})", "host.fixed": "Fixed address {host}.",
     "types.level": "level", "types.freqOnly": "frequency only", "types.learned": "Writable · learned", "types.writable": "Writable", "types.learnedTip": "The formula was learned from the Platin app and checked against the speaker (bit for bit).", "types.notYet": "Not yet",
@@ -2759,7 +2801,7 @@ function drawRoom() {
   $("#roomEmpty").hidden = !!rc;
   for (const k of ["lg-m", "lg-r"]) $("#roomLegendBox ." + k).hidden = !rc;
   const none = !!(S && S.room_curve_empty), tag = $("#roomTag"), tt = !S ? "" : none ? t("room.tagNone") : roomOn ? t("room.tagOn") : t("room.tagOff");
-  if (tag.textContent !== tt) tag.textContent = tt; tag.hidden = !tt; tag.className = "tag" + (roomOn && !none ? " amber" : "");
+  if (tag.textContent !== tt) tag.textContent = tt; tag.hidden = !tt || !none; tag.className = "tag" + (roomOn && !none ? " amber" : "");
   $("#roomLegend").textContent = !eqOn ? t("room.legendOff") : "";
   // «Les målingen» til noe er lest, deretter «… på nytt»
   const rb = $("#roomRead"), rk = S && S.room_curve_raw ? "room.read" : "room.readCurve";
@@ -2926,7 +2968,7 @@ function renderBandList() {
     box.appendChild(el);
   }
   const cnt = document.createElement("span");
-  cnt.className = "muted small"; cnt.textContent = t("bl.count", { n: list.filter(inSlots).length, max: MAX_BANDS });
+  cnt.className = "muted small bcount"; cnt.textContent = t("bl.count", { n: list.filter(inSlots).length, max: MAX_BANDS });
   box.appendChild(cnt);
 }
 
@@ -3672,7 +3714,9 @@ function bandSummary(p) {
 // én profilrad: Bruk, Oppdater, Gi nytt navn, Dupliser, og Slett (egne) eller Tilbakestill til standard (endrede ferdige)
 function profItem(p, act, lit, keep) {
   const on = act.includes(p.id), it = document.createElement("div"); it.className = "mine-item"; it.dataset.id = p.id;
-  const meta = [p.builtin ? profDesc(p) : null, bandSummary(p), p.room_correction != null ? t("prof.metaRoom", { on: p.room_correction }) : null, p.manual_eq != null ? t("prof.metaEq", { on: p.manual_eq }) : null, p.saved && (!p.builtin || p.modified) ? t("prof.metaSaved", { d: p.saved }) : null].filter(Boolean).join(" · ");
+  // ferdige profiler: bare beskrivelsen; egne: antall punkt og når den ble lagret
+  const meta = (p.builtin ? [profDesc(p), p.modified && p.saved ? t("prof.metaSaved", { d: p.saved }) : null]
+    : [bandSummary(p), p.saved ? t("prof.metaSaved", { d: p.saved }) : null]).filter(Boolean).join(" · ");
   const off = on && eqOffShown(p), nm = profName(p);
   const tags = (p.builtin && p.modified ? `<span class="tag" title="${esc(t("prof.modifiedTitle"))}">${esc(t("prof.modified"))}</span>` : "")
     + (on ? (off ? `<span class="tag" title="${esc(t("prof.eqOffTitle"))}"><span class="lamp${lit ? " white" : ""}"></span>${esc(t("prof.active"))} <small>${esc(t("prof.eqOff"))}</small></span>`
@@ -3771,11 +3815,14 @@ function renderProfiles(force) {
     const b = document.createElement("button"); const on = act.includes(p.id);
     b.className = "chip" + (profBusy === p.id ? " busy" : ""); b.setAttribute("aria-pressed", String(on)); b.disabled = !lit || !!profBusy;
     const off = on && eqOffShown(p);
-    b.innerHTML = `<span class="lamp${on && lit ? (off ? " white" : " on") : ""}${profBusy === p.id ? " on breath" : ""}"></span>${esc(profName(p))}${off ? ` <small>${esc(t("prof.eqOff"))}</small>` : ""}`;
+    b.innerHTML = `<span class="lamp${on && lit ? (off ? " white" : " on") : ""}${profBusy === p.id ? " on breath" : ""}"></span>${esc(profName(p))}`;   // «EQ av» vises av lampene (EQ-lampen og knappen Egen EQ), ikke som tekst her
     if (off) b.title = t("prof.eqOffTitle"); else b.removeAttribute("title");
     b.onclick = () => applyProfile(p.id);
     q.appendChild(b);
   }
+  // siste knapp i raden: til Profiler-fanen
+  const allBtn = document.createElement("button"); allBtn.className = "chip all"; allBtn.type = "button";
+  allBtn.textContent = t("amp.all"); allBtn.onclick = () => go("profiles"); q.appendChild(allBtn);
   // ferdige og egne har de samme radene; et åpent navnefelt beholder teksten og markeringen når listen tegnes på nytt
   let keep = null;
   const oldInp = document.querySelector("#view-profiles form.rn input");
@@ -3792,7 +3839,7 @@ function renderProfiles(force) {
   const out = all.filter(b => !b.editable && b.ix >= MAX_BANDS).length, ro = all.length - ed - out;
   // EQ-en ikke lest ennå: ingen profil er aktiv, og antallet punkt er ukjent
   $("#activeNow").innerHTML = !S ? "" : S.bands_known === false ? `<span class="lbl">${esc(t("act.label"))}</span>${esc(t("act.notRead"))}`
-    : `<span class="lbl">${esc(t("act.label"))}</span>${names.length ? esc(t("act.matches", { names: names.join(", ") })) : esc(t("act.custom"))}<br><span class="muted small">${esc(t("act.writable", { n: ed }))}${ro ? esc(t("act.ro", { n: ro })) : ""}${out ? esc(t("act.outside", { n: out })) : ""} · ${esc(t("act.room", { on: S.room_correction }))} · ${esc(t("act.eq", { on: S.manual_eq }))}</span>`;
+    : `<span class="lbl">${esc(t("act.label"))}</span>${names.length ? esc(t("act.matches", { names: names.join(", ") })) : esc(t("act.custom"))}${ro || out ? `<br><span class="muted small">${esc(t("act.writable", { n: ed }))}${ro ? esc(t("act.ro", { n: ro })) : ""}${out ? esc(t("act.outside", { n: out })) : ""} · ${esc(t("act.room", { on: S.room_correction }))} · ${esc(t("act.eq", { on: S.manual_eq }))}</span>` : ""}`;
   renderAB(); renderDisplay(); renderToneNote();
 }
 $("#saveForm").onsubmit = async ev => {
@@ -3921,8 +3968,8 @@ function renderMore() {
   const sig = JSON.stringify([LANG, S.name, S.host, v, S.verified, st, S.eq_types, S.learn_events, S.can_disable_band, S.connected, S.searching]);
   if (sig === moreSig) return; moreSig = sig;
   const rows = [[t("info.name"), S.name], [t("info.amp"), "Platin SM450"], [t("info.address"), S.host || "–"],
-    [t("info.firmware"), [v.mcu && "MCU " + v.mcu, v.ls9 && "LS9 " + v.ls9, v.cast && "Cast " + v.cast].filter(Boolean).join(" · ") || "–"],
-    [t("info.verified"), S.connected ? (S.verified || []).map(f => FEATURE_KEYS.includes(f) ? t("feat." + f) : f).join(", ") || "–" : "–"]];
+    [t("info.firmware"), [v.mcu && "MCU " + v.mcu, v.ls9 && "LS9 " + v.ls9, v.cast && "Cast " + v.cast].filter(Boolean).join(" · ") || "–"]];
+  $("#verifiedLine").textContent = t("info.verified") + ": " + (S.connected ? (S.verified || []).map(f => FEATURE_KEYS.includes(f) ? t("feat." + f) : f).join(", ") || "–" : "–");
   $("#info").innerHTML = rows.map(([k, x]) => `<dt>${esc(k)}</dt><dd>${esc(x || "–")}</dd>`).join("");
   $("#fpModel").textContent = !S.name ? "Platin SM450" : /SM\s?450/i.test(S.name) ? String(S.name) : String(S.name) + " · Platin SM450";
   const lan = st.lan_url || location.origin;

@@ -4,6 +4,19 @@ All notable changes to SUMEL, newest first. The format is based on [Keep a Chang
 
 Downloads are on the [releases page](https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases).
 
+## [1.1.0] - 2026-11-10
+
+A tidier look. Nothing works differently.
+
+### Changed
+
+- **Amplifier:** the profile buttons have the same width and fill the row, with **All** as the last button. Room correction and Custom EQ are two compact buttons. A profile button no longer says "EQ off"; the lamps show it.
+- **Phone:** the previous/play/next buttons match the input buttons, and the aluminium strip shows only the lamps.
+- **Profiles:** one row per profile with **Use** and **…** on the right, and a short "Active now" line.
+- **Room:** one card with a single switch (the lamp shows on/off) and **Read the measurement again**.
+- **EQ:** keyboard shortcuts and the explanation of the filters are behind a small **Tips and keyboard** link.
+- **More:** settings first and Help last. Language and Appearance share one card.
+
 ## [1.0.1] - 2026-11-09
 
 ### Changed
@@ -121,6 +134,7 @@ Development under the name Lemus Remote, before the public release. Not released
 - English and Norwegian, and a home-screen app on phones.
 - **0.9.0:** Curve EQ, the stored room curve, wider tone controls, and a Windows program with a tray icon and installer.
 
+[1.1.0]: https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/tag/v1.1.0
 [1.0.1]: https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/tag/v1.0.1
 [1.0.0]: https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/tag/v1.0.0
 [0.10.1]: https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/tag/v0.10.1
