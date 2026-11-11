@@ -151,6 +151,8 @@ class Speaker:
         # kaller _-variantene, som ikke tar den.
         self._eq_lock = asyncio.Lock()
         self.source_confirm = SOURCE_CONFIRM
+        self.wake_wait = 8.0            # sekunder vi venter på «på» etter DLNA-vekking
+        self.wake_reconnect_wait = 12.0  # ... og etter en ny tilkobling hvis høyttaleren ikke svarte
         self._source_seen = 0  # antall kildemeldinger (02 02), så vi kan vente på en fersk etter vekking
         self._source_before_standby: int | None = None
         self.wake_source_wait = WAKE_SOURCE_WAIT
@@ -835,9 +837,12 @@ class Speaker:
             # Strøm er en veksler, så vi må vite nåværende tilstand først.
             self.state["power"] = None
             await self._send_control(p.GET_POWER)
-            if not await self._wait_for(lambda s: s["power"] is not None, 3):
+            known = await self._wait_for(lambda s: s["power"] is not None, 3)
+            if not known and not on:
                 raise CommandError("fikk ikke lest strømstatus")
-            if self.state["power"] is on:
+            # Ingen svar ved PÅ: høyttaleren står i dyp standby (styrebrikken svarer ikke, se lemus.log
+            # 9.–11.11.2026). Da vekkes den på samme måte som fra vanlig standby, via DLNA.
+            if known and self.state["power"] is on:
                 return
             if not on:
                 self._source_before_standby = self.state["source"]
@@ -854,8 +859,16 @@ class Speaker:
                 await self.waker(self.host, local_ip)
             except Exception as exc:  # noqa: BLE001
                 raise CommandError(f"kunne ikke vekke høyttaleren via DLNA ({exc})") from exc
-            if not await self._wait_for(lambda s: s["power"] is True, 8, resend=p.GET_POWER, every=1.0):
-                raise CommandError("høyttaleren våknet ikke")
+            if not await self._wait_for(lambda s: s["power"] is True, self.wake_wait, resend=p.GET_POWER, every=1.0):
+                if self.state["power"] is not None:
+                    raise CommandError("høyttaleren våknet ikke")
+                # Fortsatt ikke et ord på 50006: forbindelsen fra før høyttaleren sovnet er trolig død.
+                # Koble til på nytt (tilkoblingen spør etter strøm av seg selv) og vent på svaret.
+                log.info("50006: ingen svar etter vekking, kobler til på nytt")
+                if self._ctl is not None:
+                    self._ctl.close()
+                if not await self._wait_for(lambda s: s["power"] is True, self.wake_reconnect_wait, every=0.5):
+                    raise CommandError("høyttaleren våknet ikke")
         await self._restore_source()
 
     async def _restore_source(self) -> None:

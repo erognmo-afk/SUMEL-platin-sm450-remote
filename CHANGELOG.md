@@ -4,6 +4,12 @@ All notable changes to SUMEL, newest first. The format is based on [Keep a Chang
 
 Downloads are on the [releases page](https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases).
 
+## [1.1.1] - 2026-11-11
+
+### Fixed
+
+- **Switching on from deep standby.** After a long time in standby the amplifier can stop answering on the network. SUMEL then did not know whether it was on or off, the power button did nothing, and a wake was never tried. Now SUMEL wakes the speaker in that case too (the power button and the banner show **Switch on**), and reconnects if the old connection stays silent after the wake.
+
 ## [1.1.0] - 2026-11-10
 
 A tidier look. Nothing works differently.
@@ -134,6 +140,7 @@ Development under the name Lemus Remote, before the public release. Not released
 - English and Norwegian, and a home-screen app on phones.
 - **0.9.0:** Curve EQ, the stored room curve, wider tone controls, and a Windows program with a tray icon and installer.
 
+[1.1.1]: https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/tag/v1.1.1
 [1.1.0]: https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/tag/v1.1.0
 [1.0.1]: https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/tag/v1.0.1
 [1.0.0]: https://github.com/erognmo-afk/SUMEL-platin-sm450-remote/releases/tag/v1.0.0

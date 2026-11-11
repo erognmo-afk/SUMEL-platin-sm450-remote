@@ -1297,7 +1297,7 @@ details.tips .hint { margin-top:4px; }
       </div>
     </div>
   </details>
-  <p class="small muted" id="aboutLine" style="margin:22px 4px 8px;opacity:.75"><b>SUMEL</b> 1.1.0 · <span data-i18n="about.tag">fjernkontroll for Platin SM450</span><br><i data-i18n="about.why">Utviklet grunnet irritasjon på dårlige eller ikke-eksisterende apper. =)</i></p>
+  <p class="small muted" id="aboutLine" style="margin:22px 4px 8px;opacity:.75"><b>SUMEL</b> 1.1.1 · <span data-i18n="about.tag">fjernkontroll for Platin SM450</span><br><i data-i18n="about.why">Utviklet grunnet irritasjon på dårlige eller ikke-eksisterende apper. =)</i></p>
 </section>
 </main>
 <div id="toasts" aria-live="polite"></div>
@@ -1318,7 +1318,7 @@ const I18N = {
     "banner.lostPc": "PC-en svarer ikke", "banner.lostPcText": "Sjekk at PC-en er på og våken, og at du er på samme nettverk. Prøver igjen automatisk.",
     "banner.retry": "Prøv igjen", "banner.help": "Hva kan jeg sjekke?", "banner.find": "Finn høyttaleren",
     "banner.reconnecting": "Kobler til på nytt …",
-    "banner.searching": "Leter etter høyttaleren", "banner.searchingText": "Søker på hjemmenettet. Kontrollene er låst til den er funnet.", "banner.searchingLong": "Fant den ikke ennå. Skriv inn høyttalerens IP-adresse, eller sjekk at den har strøm og er på samme nett som PC-en (ikke gjestenettet).", "banner.enterIp": "Skriv IP-adresse", "banner.noPower": "Høyttaleren svarer ikke som ventet", "banner.noPowerText": "Den er funnet, men melder ikke om den er på. Er det en høyttaler med Platin SM450? Prøv å slå den av og på.",
+    "banner.searching": "Leter etter høyttaleren", "banner.searchingText": "Søker på hjemmenettet. Kontrollene er låst til den er funnet.", "banner.searchingLong": "Fant den ikke ennå. Skriv inn høyttalerens IP-adresse, eller sjekk at den har strøm og er på samme nett som PC-en (ikke gjestenettet).", "banner.enterIp": "Skriv IP-adresse", "banner.noPower": "Høyttaleren svarer ikke", "banner.noPowerText": "Den står trolig i dyp standby. Trykk «Slå på» for å vekke den.",
     "banner.noSpeaker": "Ingen kontakt med høyttaleren", "banner.noSpeakerText": "Sjekk at den har strøm og er på samme nett. Prøver igjen automatisk.",
     "banner.settings": "Innstillinger", "banner.waking": "Vekker høyttaleren …", "banner.wakingText": "Dette tar 5–8 sekunder.",
     "banner.standby": "Høyttaleren står i standby", "banner.standbyText": "Slå på for å bruke kontrollene.",
@@ -1536,7 +1536,7 @@ const I18N = {
     "banner.lostPc": "The PC isn’t responding", "banner.lostPcText": "Check that the PC is on and awake, and that you’re on the same network. Retrying automatically.",
     "banner.retry": "Try again", "banner.help": "What can I check?", "banner.find": "Find the speaker",
     "banner.reconnecting": "Reconnecting …",
-    "banner.searching": "Searching for the speaker", "banner.searchingText": "Searching the home network. The controls are locked until it’s found.", "banner.searchingLong": "Not found yet. Enter the speaker’s IP address, or check that it has power and is on the same network as this PC (not a guest network).", "banner.enterIp": "Enter IP address", "banner.noPower": "The speaker isn’t answering as expected", "banner.noPowerText": "It was found but doesn’t report whether it’s on. Is it a speaker with a Platin SM450? Try switching it off and on.",
+    "banner.searching": "Searching for the speaker", "banner.searchingText": "Searching the home network. The controls are locked until it’s found.", "banner.searchingLong": "Not found yet. Enter the speaker’s IP address, or check that it has power and is on the same network as this PC (not a guest network).", "banner.enterIp": "Enter IP address", "banner.noPower": "The speaker isn’t answering", "banner.noPowerText": "It’s probably in deep standby. Press “Switch on” to wake it.",
     "banner.noSpeaker": "No contact with the speaker", "banner.noSpeakerText": "Check that it’s powered and on the same network. Retrying automatically.",
     "banner.settings": "Settings", "banner.waking": "Waking the speaker …", "banner.wakingText": "This takes 5–8 seconds.",
     "banner.standby": "The speaker is in standby", "banner.standbyText": "Switch it on to use the controls.",
@@ -2304,7 +2304,8 @@ $$("[data-t]").forEach(b => b.onclick = () => api("/api/transport", { action: b.
 $("#playBtn").onclick = () => api("/api/transport", { action: S && S.play_state === "playing" ? "pause" : "play" });
 
 $("#pwr").onclick = async () => {
-  if (!online() || pBusy() || S.power == null) return;
+  // Ukjent strøm (høyttaleren svarer ikke, typisk dyp standby): knappen slår PÅ
+  if (!online() || pBusy()) return;
   const on = S.power !== true;
   powerBusy = on ? "on" : "off"; renderStatus(); applyNeeds(); updateVolume();
   const r = await api("/api/power", { on });
@@ -4131,7 +4132,8 @@ function renderStatus() {
   // strømknapp
   const pw = $("#pwr");
   pw.classList.toggle("on", !!(S && S.power === true));
-  pw.disabled = !online() || !!pb || (S && S.power == null);
+  // ukjent strøm: knappen er av de første sekundene (lesing pågår), deretter kan den vekke høyttaleren
+  pw.disabled = !online() || !!pb || (S && S.power == null && !isSlow("power", SLOW_POWER_MS));
   const pl = "lamp" + (!online() ? "" : pb ? " on breath" : S.power === true ? " white" : S.power === false ? " red" : "");
   setCls($("#pwrLamp"), pl);
   const pa = S && S.power === true ? t("pwr.off") : t("pwr.on");
@@ -4162,6 +4164,7 @@ function renderStatus() {
   }
   else if (pb !== "on" && S.power == null && pb !== "off" && isSlow("power", SLOW_POWER_MS)) {
     title = t("banner.noPower"); text = t("banner.noPowerText"); err = true; lampCls = "lamp red"; help = "helpFind";
+    action = { label: t("pwr.on"), fn: () => $("#pwr").click() };
   }
   else if (pb === "on" || (S.power == null && pb !== "off")) { title = t("banner.waking"); text = t("banner.wakingText"); }
   else if (S.power === false) { title = t("banner.standby"); text = t("banner.standbyText"); lampCls = "lamp red"; action = { label: t("pwr.on"), fn: () => $("#pwr").click() }; }
